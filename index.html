@@ -12,18 +12,53 @@ body{margin:0;background:black;color:white;text-align:center;font-family:Arial;}
 
 img{width:90%;max-width:500px;border-radius:10px;margin:10px;}
 
-button{padding:12px;margin:6px;border:none;border-radius:8px;background:#2e7d32;color:white;font-size:16px;}
+button{padding:12px;margin:6px;border:none;border-radius:8px;background:#2e7d32;color:white;}
 
 .colorBox{width:60px;height:60px;display:inline-block;margin:5px;border-radius:10px;}
+
+#timer{font-size:30px;color:red;}
 
 .flash{animation:flash 0.3s;}
 @keyframes flash{0%{background:red;}100%{background:black;}}
 
-#timer{font-size:30px;color:red;}
+/* POPUP */
+.popup{
+display:none;
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.9);
+justify-content:center;
+align-items:center;
+}
+
+#popupContent{
+animation:zoomIn 0.5s ease;
+}
+
+#number{
+font-size:80px;
+text-shadow:0 0 20px yellow,0 0 40px orange;
+animation:glow 1s infinite alternate;
+}
+
+@keyframes zoomIn{
+from{transform:scale(0.3);}
+to{transform:scale(1);}
+}
+
+@keyframes glow{
+from{text-shadow:0 0 10px yellow;}
+to{text-shadow:0 0 40px orange,0 0 60px yellow;}
+}
 </style>
 </head>
 
 <body>
+
+<audio id="foundSound" src="2241.mp3"></audio>
 
 <!-- INTRO -->
 <div class="screen active" id="s0">
@@ -35,10 +70,9 @@ button{padding:12px;margin:6px;border:none;border-radius:8px;background:#2e7d32;
 
 <!-- MORSE -->
 <div class="screen" id="s1">
-<p>Le fermier te montre un message :</p>
+<p>Message du fermier :</p>
 <h2>.-.. -.-- -. -..-</h2>
-<p>Chaque groupe correspond à une lettre</p>
-<input id="q1" placeholder="Mot"><br>
+<input id="q1"><br>
 <button onclick="checkQ1()">Valider</button>
 </div>
 
@@ -53,33 +87,42 @@ button{padding:12px;margin:6px;border:none;border-radius:8px;background:#2e7d32;
 
 <!-- ARBRE -->
 <div class="screen" id="s2">
-<p>Observe l’arbre…</p>
+<p>Observe l’arbre… clique sur la gravure</p>
 
 <div style="position:relative;display:inline-block;">
 <img src="resiarb.png">
-<div onclick="askTree()" style="position:absolute;top:60%;left:40%;width:80px;height:80px;"></div>
+
+<div onclick="showPopup()" 
+style="position:absolute;top:60%;left:40%;width:80px;height:80px;border:2px dashed white;">
+</div>
+</div>
 </div>
 
-<p id="treeQuestion"></p>
+<!-- POPUP -->
+<div id="popup" class="popup">
+<div id="popupContent">
+<h1 id="number">3</h1>
+<button onclick="closePopup()">Continuer</button>
+</div>
+</div>
 
-<div id="treeInput" style="display:none;">
+<!-- QUESTION -->
+<div class="screen" id="s2q">
+<p>Quel chiffre était gravé ?</p>
 <input id="treeAnswer"><br>
 <button onclick="checkTree()">Valider</button>
-</div>
 </div>
 
 <!-- LETTRES -->
 <div class="screen" id="s3">
 <p>Reconstitue le mot :</p>
 
-<div id="letters">
 <button onclick="addLetter('S')">S</button>
 <button onclick="addLetter('O')">O</button>
 <button onclick="addLetter('L')">L</button>
 <button onclick="addLetter('D')">D</button>
 <button onclick="addLetter('A')">A</button>
 <button onclick="addLetter('T')">T</button>
-</div>
 
 <p id="word"></p>
 
@@ -88,7 +131,7 @@ button{padding:12px;margin:6px;border:none;border-radius:8px;background:#2e7d32;
 
 <!-- MEMOIRE -->
 <div class="screen" id="s4">
-<p>Observe bien… les couleurs vont disparaître</p>
+<p>Observe…</p>
 
 <div id="sequence"></div>
 
@@ -106,8 +149,7 @@ button{padding:12px;margin:6px;border:none;border-radius:8px;background:#2e7d32;
 
 <!-- COFFRE -->
 <div class="screen" id="s5">
-<p>Assemble :</p>
-<p><b>MOT + CHIFFRE</b></p>
+<p>MOT + CHIFFRE</p>
 <input id="final"><br>
 <button onclick="checkFinal()">Ouvrir</button>
 </div>
@@ -167,10 +209,15 @@ alert("Trop lent !");
 location.reload();
 }
 
-// ARBRE
-function askTree(){
-document.getElementById("treeQuestion").innerText="Quel chiffre est gravé ?";
-document.getElementById("treeInput").style.display="block";
+// POPUP
+function showPopup(){
+document.getElementById("popup").style.display="flex";
+document.getElementById("foundSound").play();
+}
+
+function closePopup(){
+document.getElementById("popup").style.display="none";
+next("s2q");
 }
 
 function checkTree(){
@@ -204,18 +251,12 @@ let playerSeq=[];
 function showSequence(){
 let s=document.getElementById("sequence");
 s.innerHTML="";
-
 seq.forEach(c=>{
-let div=document.createElement("div");
-div.className="colorBox";
-div.style.background=
-c=="r"?"red":
-c=="y"?"yellow":
-c=="b"?"blue":
-"green";
-s.appendChild(div);
+let d=document.createElement("div");
+d.className="colorBox";
+d.style.background=c=="r"?"red":c=="y"?"yellow":c=="b"?"blue":"green";
+s.appendChild(d);
 });
-
 setTimeout(()=>{s.innerHTML="";},3000);
 }
 
