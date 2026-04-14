@@ -6,52 +6,26 @@
 <title>Mission Résistance</title>
 
 <style>
-body{
-  margin:0;
-  font-family: Arial;
-  background:black;
-  color:white;
-  text-align:center;
-}
-
+body{margin:0;font-family:Arial;background:black;color:white;text-align:center;}
 .screen{display:none;padding:20px;}
 .active{display:block;}
 
-img{
-  width:90%;
-  max-width:500px;
-  border-radius:10px;
-  margin:15px 0;
-}
+img{width:90%;max-width:500px;border-radius:10px;margin:15px 0;}
 
-button{
-  padding:12px 20px;
-  margin:10px;
-  border:none;
-  border-radius:8px;
-  background:#2e7d32;
-  color:white;
-}
+button{padding:12px;margin:10px;border:none;border-radius:8px;background:#2e7d32;color:white;}
 
-input{
-  padding:10px;
-  border-radius:8px;
-  border:none;
-}
+input{padding:10px;border-radius:8px;border:none;}
 
-#timer,#timerSoldat{
-  font-size:28px;
-  color:red;
-}
+#timerSoldat{font-size:30px;color:red;}
 
 .flash{animation:flash 0.3s;}
 @keyframes flash{0%{background:red;}100%{background:black;}}
 
 .shake{animation:shake 0.3s;}
 @keyframes shake{
-  0%{transform:translateX(0);}
-  50%{transform:translateX(6px);}
-  100%{transform:translateX(0);}
+0%{transform:translateX(0);}
+50%{transform:translateX(6px);}
+100%{transform:translateX(0);}
 }
 </style>
 </head>
@@ -62,193 +36,194 @@ input{
 <audio id="clic" src="261.mp3"></audio>
 <audio id="good" src="2241.mp3"></audio>
 <audio id="bad" src="9334.mp3"></audio>
-<audio id="alarm" src="10805.mp3"></audio>
+<audio id="alarm" src="Warning Alarm.mp3"></audio>
 <audio id="tension" src="sf_tictac1.mp3" loop></audio>
+<audio id="tir" src="Sharp crack of a sniper rifle in a desolate urban environment.mp3"></audio>
+<audio id="explosion" src="Whizzing sound of incoming artillery shells followed by a ground-shaking impact.mp3"></audio>
+<audio id="radio" src="Radio.mp3" loop></audio>
 
 <!-- ENFANTS -->
 <div class="screen active" id="s0">
-  <h2>Les enfants de la Résistance</h2>
-  <img src="enfants.png">
-  <p>Vous êtes les seuls capables de passer inaperçus…</p>
-  <button onclick="next('s1')">Commencer la mission</button>
+<h2>Les enfants de la Résistance</h2>
+<img src="enfants.png">
+<p>Vous êtes les seuls capables de passer inaperçus…</p>
+<button onclick="next('s1')">Commencer</button>
 </div>
 
 <!-- INTRO -->
 <div class="screen" id="s1">
-  <img src="ferme.png">
-  <p>1940. Un message secret est caché.</p>
-  <button onclick="next('s2')">Continuer</button>
+<img src="ferme.png">
+<p>1940. Un message secret est caché.</p>
+<button onclick="next('s2')">Continuer</button>
 </div>
 
 <!-- FERMIER -->
 <div class="screen" id="s2">
-  <img src="fermier.png">
-  <p>"Prouve que tu es des nôtres."</p>
-  <button onclick="next('s3')">Continuer</button>
+<img src="fermier.png">
+<p>"Prouve que tu es des nôtres."</p>
+<button onclick="next('s3')">Continuer</button>
 </div>
 
 <!-- MORSE -->
 <div class="screen" id="s3">
-  <img src="mot.png">
-  <p>Message radio intercepté :</p>
-  <button onclick="playMorse()">🔊 Écouter</button>
-  <br><br>
-  <input id="q1" placeholder="Mot">
-  <br>
-  <button onclick="checkQ1()">Valider</button>
+<img src="mot.png">
+<p>Message radio :</p>
+<button onclick="playMorse()">🔊 Écouter</button>
+<br><br>
+<input id="q1">
+<br>
+<button onclick="checkQ1()">Valider</button>
 </div>
 
 <!-- FORET -->
 <div class="screen" id="s4">
-  <img src="foret.png">
-  <p>Va jusqu’au pont…</p>
-  <button onclick="next('s5')">Continuer</button>
+<img src="foret.png">
+<p>Va au pont…</p>
+<button onclick="next('s5')">Continuer</button>
 </div>
 
 <!-- Q2 -->
 <div class="screen" id="s5">
-  <img src="pont.png">
-  <p>Numéro du message ?</p>
-  <input id="q2">
-  <br>
-  <button onclick="checkQ2()">Valider</button>
+<img src="pont.png">
+<p>Numéro du message ?</p>
+<input id="q2">
+<br>
+<button onclick="checkQ2()">Valider</button>
 </div>
 
 <!-- SOLDAT -->
 <div class="screen" id="soldat">
-  <img src="z2.png">
-  <h2>HALT !</h2>
-  <p>Un soldat te vise !</p>
-  <div id="timerSoldat">3</div>
-  <button onclick="grenade()">💣 Lancer</button>
-  <button onclick="fuite()">🏃 Fuir</button>
+<img src="z2.png">
+<h2>HALT !</h2>
+<p>Un soldat te vise !</p>
+<div id="timerSoldat">3</div>
+<button onclick="grenade()">💣 Lancer</button>
+<button onclick="fuite()">🏃 Fuir</button>
 </div>
 
 <!-- CACHE -->
 <div class="screen" id="s7">
-  <img src="resiarb.png">
-  <p>Code final</p>
-  <input id="final">
-  <br>
-  <button onclick="checkFinal()">Valider</button>
-</div>
-
-<!-- QR -->
-<div class="screen" id="s8">
-  <img src="lock-ttx6E2HF.png">
-  <p>Scan</p>
+<img src="resiarb.png">
+<p>Code final</p>
+<input id="final">
+<br>
+<button onclick="checkFinal()">Valider</button>
 </div>
 
 <!-- FIN -->
 <div class="screen" id="s9">
-  <img src="final.png">
-  <h2>Mission accomplie</h2>
+<img src="final.png">
+<h2>Mission accomplie</h2>
 </div>
 
 <script>
 
-// volume bas
+// volumes
 clic.volume=0.2;
 good.volume=0.3;
 bad.volume=0.25;
 alarm.volume=0.2;
 tension.volume=0.15;
+tir.volume=0.3;
+explosion.volume=0.4;
+radio.volume=0.15;
 
 function play(id){
-  let a=document.getElementById(id);
-  a.currentTime=0;
-  a.play();
+let a=document.getElementById(id);
+a.currentTime=0;
+a.play();
 }
 
 function next(id){
-  play("clic");
-  document.querySelector(".active").classList.remove("active");
-  document.getElementById(id).classList.add("active");
+play("clic");
+document.querySelector(".active").classList.remove("active");
+document.getElementById(id).classList.add("active");
 }
 
 // MORSE
 async function playMorse(){
-  let dot=200, dash=600;
+let dot=200, dash=600;
+let seq=[".-..","-.--","-.","-..-"];
 
-  let seq=[".-..","-.--","-.","-..-"];
-
-  for(let l of seq){
-    for(let s of l){
-      let dur = s=="."?dot:dash;
-      beep(dur);
-      await new Promise(r=>setTimeout(r,dur+200));
-    }
-    await new Promise(r=>setTimeout(r,400));
-  }
+for(let l of seq){
+for(let s of l){
+beep(s=="."?dot:dash);
+await new Promise(r=>setTimeout(r,400));
+}
+}
 }
 
 function beep(d){
-  let ctx=new AudioContext();
-  let o=ctx.createOscillator();
-  o.connect(ctx.destination);
-  o.start();
-  o.stop(ctx.currentTime+d/1000);
+let ctx=new AudioContext();
+let o=ctx.createOscillator();
+o.connect(ctx.destination);
+o.start();
+o.stop(ctx.currentTime+d/1000);
 }
 
 function error(){
-  play("bad");
-  play("alarm");
-  document.body.classList.add("flash","shake");
-  setTimeout(()=>document.body.classList.remove("flash","shake"),300);
+play("bad");
+play("alarm");
+document.body.classList.add("flash","shake");
+setTimeout(()=>document.body.classList.remove("flash","shake"),300);
 }
 
 // Q1
 function checkQ1(){
-  if(q1.value.toLowerCase()=="lynx"){
-    play("good");
-    next("s4");
-  }else error();
+if(q1.value.toLowerCase()=="lynx"){
+play("good");
+next("s4");
+}else error();
 }
 
 // Q2
 function checkQ2(){
-  if(q2.value=="3"){
-    play("good");
-    startSoldat();
-  }else error();
+if(q2.value=="3"){
+play("good");
+startSoldat();
+}else error();
 }
 
 // SOLDAT
-let t=3, int;
+let t=3,int;
 
 function startSoldat(){
-  next("soldat");
-  t=3;
-  int=setInterval(()=>{
-    t--;
-    timerSoldat.innerText=t;
-    if(t<=0){fail();}
-  },1000);
+next("soldat");
+play("radio");
+t=3;
+int=setInterval(()=>{
+t--;
+timerSoldat.innerText=t;
+if(t<=0) fail();
+},1000);
 }
 
 function grenade(){
-  clearInterval(int);
-  play("good");
-  next("s7");
+clearInterval(int);
+play("explosion");
+radio.pause();
+setTimeout(()=>{
+play("good");
+next("s7");
+},600);
 }
 
-function fuite(){
-  fail();
-}
+function fuite(){fail();}
 
 function fail(){
-  clearInterval(int);
-  error();
-  setTimeout(()=>location.reload(),800);
+clearInterval(int);
+play("tir");
+error();
+setTimeout(()=>location.reload(),800);
 }
 
 // FINAL
 function checkFinal(){
-  if(final.value.toLowerCase()=="lynx3"){
-    play("good");
-    next("s8");
-    setTimeout(()=>next("s9"),3000);
-  }else error();
+let val=final.value.toLowerCase().replace(" ","");
+if(val=="lynx3"){
+play("good");
+next("s9");
+}else error();
 }
 
 </script>
