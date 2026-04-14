@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mission Résistance</title>
+
+<style>
+body{
+  margin:0;
+  font-family: Arial;
+  background:black;
+  color:white;
+  text-align:center;
+  overflow:hidden;
+}
+
+.screen{
+  display:none;
+  padding:20px;
+}
+
+.active{
+  display:block;
+}
+
+img{
+  width:90%;
+  max-width:500px;
+  border-radius:10px;
+  margin:15px 0;
+}
+
+button{
+  padding:12px 20px;
+  font-size:16px;
+  margin:10px;
+  border:none;
+  border-radius:8px;
+  background:#2e7d32;
+  color:white;
+}
+
+input{
+  padding:10px;
+  font-size:16px;
+  border-radius:8px;
+  border:none;
+}
+
+#timer{
+  font-size:30px;
+  color:red;
+  margin:10px;
+}
+
+.flash{
+  animation:flash 0.3s;
+}
+
+@keyframes flash{
+  0%{background:red;}
+  100%{background:black;}
+}
+
+.shake{
+  animation:shake 0.3s;
+}
+
+@keyframes shake{
+  0%{transform:translateX(0);}
+  25%{transform:translateX(-5px);}
+  50%{transform:translateX(5px);}
+  75%{transform:translateX(-5px);}
+  100%{transform:translateX(0);}
+}
+</style>
+</head>
+
+<body>
+
+<!-- SONS -->
+<audio id="clic" src="261.mp3"></audio>
+<audio id="good" src="2241.mp3"></audio>
+<audio id="bad" src="9334.mp3"></audio>
+<audio id="alarm" src="10805.mp3"></audio>
+<audio id="tension" src="sf_tictac1.mp3" loop></audio>
+
+<div id="timer"></div>
+
+<!-- INTRO -->
+<div class="screen active" id="s1">
+  <h2>Mission Résistance</h2>
+  <img src="ferme.png">
+  <p>1940. Trouve le message avant les soldats.</p>
+  <button onclick="next('s2')">Commencer</button>
+</div>
+
+<!-- FERMIER -->
+<div class="screen" id="s2">
+  <img src="fermier.png">
+  <p>"Trouve le mot caché."</p>
+  <button onclick="next('s3')">Continuer</button>
+</div>
+
+<!-- Q1 -->
+<div class="screen" id="s3">
+  <img src="mot.png">
+  <p>Mot ?</p>
+  <input id="q1">
+  <br>
+  <button onclick="checkQ1()">Valider</button>
+</div>
+
+<!-- FORET -->
+<div class="screen" id="s4">
+  <img src="foret.png">
+  <p>Va au pont…</p>
+  <button onclick="next('s5')">Continuer</button>
+</div>
+
+<!-- Q2 -->
+<div class="screen" id="s5">
+  <img src="pont.png">
+  <p>Numéro ?</p>
+  <input id="q2">
+  <br>
+  <button onclick="checkQ2()">Valider</button>
+</div>
+
+<!-- DANGER -->
+<div class="screen" id="s6">
+  <img src="foret.png">
+  <p>Fais vite !</p>
+  <button onclick="startTimer()">Lancer</button>
+</div>
+
+<!-- CACHE -->
+<div class="screen" id="s7">
+  <img src="resiarb.png">
+  <p>Code final</p>
+  <input id="final">
+  <br>
+  <button onclick="checkFinal()">Valider</button>
+</div>
+
+<!-- QR -->
+<div class="screen" id="s8">
+  <img src="lock-ttx6E2HF.png">
+  <p>Scan</p>
+</div>
+
+<!-- FIN -->
+<div class="screen" id="s9">
+  <img src="final.png">
+  <h2>Mission accomplie</h2>
+</div>
+
+<script>
+
+let time = 30;
+let timerInterval;
+
+function play(id){
+  let a = document.getElementById(id);
+  a.currentTime = 0;
+  a.play();
+}
+
+function next(id){
+  play("clic");
+  document.querySelector(".active").classList.remove("active");
+  document.getElementById(id).classList.add("active");
+}
+
+function errorEffect(){
+  play("bad");
+  play("alarm");
+  document.body.classList.add("flash");
+  document.body.classList.add("shake");
+
+  setTimeout(()=>{
+    document.body.classList.remove("flash");
+    document.body.classList.remove("shake");
+  },300);
+}
+
+function checkQ1(){
+  let val = q1.value.toLowerCase();
+  if(val==="lynx"){
+    play("good");
+    next("s4");
+  }else{
+    errorEffect();
+  }
+}
+
+function checkQ2(){
+  let val = q2.value;
+  if(val==="3"){
+    play("good");
+    next("s6");
+  }else{
+    errorEffect();
+  }
+}
+
+function startTimer(){
+  next("s7");
+  play("tension");
+
+  timerInterval = setInterval(()=>{
+    time--;
+    document.getElementById("timer").innerText = time+"s";
+
+    if(time<=0){
+      clearInterval(timerInterval);
+      alert("Temps écoulé !");
+      location.reload();
+    }
+  },1000);
+}
+
+function checkFinal(){
+  let val = final.value.toLowerCase();
+
+  if(val==="lynx3"){
+    clearInterval(timerInterval);
+    document.getElementById("tension").pause();
+    play("good");
+    next("s8");
+
+    setTimeout(()=>next("s9"),3000);
+
+  }else{
+    errorEffect();
+  }
+}
+
+</script>
+
+</body>
+</html>
