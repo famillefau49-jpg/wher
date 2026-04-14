@@ -6,132 +6,115 @@
 <title>Mission Résistance</title>
 
 <style>
-body{margin:0;font-family:Arial;background:black;color:white;text-align:center;}
+body{margin:0;background:black;color:white;text-align:center;font-family:Arial;}
 .screen{display:none;padding:20px;}
 .active{display:block;}
-img{width:90%;max-width:500px;border-radius:10px;margin:15px 0;}
-button{padding:12px;margin:10px;border:none;border-radius:8px;background:#2e7d32;color:white;}
+
+img{width:90%;max-width:500px;border-radius:10px;margin:10px;}
+
+button{padding:12px;margin:8px;background:#2e7d32;color:white;border:none;border-radius:8px;}
+
 input{padding:10px;border-radius:8px;border:none;}
+
+.zone{position:relative;display:inline-block;}
+.click{position:absolute;}
+
 #timer{font-size:30px;color:red;}
 
 .flash{animation:flash 0.3s;}
 @keyframes flash{0%{background:red;}100%{background:black;}}
-.shake{animation:shake 0.3s;}
-@keyframes shake{
-0%{transform:translateX(0);}
-50%{transform:translateX(6px);}
-100%{transform:translateX(0);}
-}
 </style>
 </head>
 
 <body>
 
 <!-- SONS -->
-<audio id="clic" src="261.mp3"></audio>
 <audio id="good" src="2241.mp3"></audio>
 <audio id="bad" src="9334.mp3"></audio>
-<audio id="alarm" src="Warning Alarm.mp3"></audio>
-<audio id="tension" src="sf_tictac1.mp3" loop></audio>
-<audio id="radio" src="Radio.mp3" loop></audio>
 <audio id="tir" src="Sharp crack of a sniper rifle in a desolate urban environment.mp3"></audio>
 <audio id="explosion" src="Whizzing sound of incoming artillery shells followed by a ground-shaking impact.mp3"></audio>
 
 <!-- INTRO -->
 <div class="screen active" id="s0">
-<h2>MISSION : RÉSISTANCE</h2>
+<h2>MISSION RÉSISTANCE</h2>
 <img src="enfants.png">
-<p>1940. Vous êtes les seuls à pouvoir agir.</p>
+<p>Vous êtes les seuls capables d’agir…</p>
 <button onclick="next('s1')">Commencer</button>
 </div>
 
-<!-- FERME -->
-<div class="screen" id="s1">
-<img src="ferme.png">
-<p>Un fermier vous observe…</p>
-<button onclick="next('s2')">Continuer</button>
-</div>
-
 <!-- MORSE -->
-<div class="screen" id="s2">
-<img src="mot.png">
-<p>Décode le message radio</p>
+<div class="screen" id="s1">
+<p>Message radio :</p>
 <button onclick="playMorse()">🔊 Écouter</button><br>
-<input id="q1"><br>
+<input id="q1" placeholder="Mot"><br>
 <button onclick="checkQ1()">Valider</button>
-</div>
-
-<!-- FORET -->
-<div class="screen" id="s3">
-<img src="foret.png">
-<p>Vous avancez dans la forêt…</p>
-<button onclick="next('s4')">Continuer</button>
 </div>
 
 <!-- SOLDAT -->
 <div class="screen" id="soldat">
 <img src="z2.png">
 <p>HALT !</p>
-<div id="timer">3</div>
+<div id="timer">10</div>
 <button onclick="grenade()">💣 Lancer</button>
 <button onclick="fail()">🏃 Fuir</button>
 </div>
 
-<!-- PONT -->
-<div class="screen" id="s5">
-<img src="pont.png">
-<p>
-1 message fermier<br>
-1 message radio<br>
-1 message pont<br><br>
-Combien de messages ?
-</p>
+<!-- ARBRE -->
+<div class="screen" id="s2">
+<p>Trouve la gravure</p>
+<div class="zone">
+<img src="resiarb.png">
+<div class="click" style="top:70%;left:40%;width:80px;height:80px;" onclick="foundTree()"></div>
+</div>
+</div>
+
+<!-- FEUILLE -->
+<div class="screen" id="s3">
+<img src="feuille.png">
+<p>Remets les lettres dans l’ordre</p>
 <input id="q2"><br>
 <button onclick="checkQ2()">Valider</button>
 </div>
 
-<!-- ARBRE -->
-<div class="screen" id="s6">
-<img src="resiarb.png">
-<p>Une cache secrète…</p>
-<button onclick="next('s7')">Fouiller</button>
+<!-- MEMOIRE -->
+<div class="screen" id="s4">
+<p>Mémorise la séquence</p>
+<h2 id="sequence"></h2>
+<button onclick="startMemory()">Voir</button><br>
+<input id="memoryInput" placeholder="ex: rouge bleu vert"><br>
+<button onclick="checkMemory()">Valider</button>
 </div>
 
-<!-- FINAL -->
-<div class="screen" id="s7">
-<p>Entre le code final</p>
+<!-- COFFRE -->
+<div class="screen" id="s5">
+<p>Entre le code du coffre</p>
 <input id="final"><br>
 <button onclick="checkFinal()">Valider</button>
 </div>
 
 <!-- FIN -->
-<div class="screen" id="s8">
+<div class="screen" id="s6">
+<h2>MISSION ACCOMPLIE</h2>
 <img src="final.png">
-<h2>Mission accomplie</h2>
+<p>Message transmis</p>
 </div>
 
 <script>
 
-// volume
-clic.volume=0.2;
-good.volume=0.3;
-bad.volume=0.2;
-alarm.volume=0.2;
-tension.volume=0.15;
-radio.volume=0.15;
-tir.volume=0.3;
-explosion.volume=0.4;
-
-function play(id){
-let a=document.getElementById(id);
-a.currentTime=0;
-a.play();
-}
-
+// NAV
 function next(id){
-play("clic");
 document.querySelector(".active").classList.remove("active");
 document.getElementById(id).classList.add("active");
+}
+
+// AUDIO
+function play(id){document.getElementById(id).play();}
+
+// ERROR
+function error(){
+play("bad");
+document.body.classList.add("flash");
+setTimeout(()=>document.body.classList.remove("flash"),200);
 }
 
 // MORSE
@@ -141,7 +124,7 @@ let seq=[".-..","-.--","-.","-..-"];
 for(let l of seq){
 for(let s of l){
 beep(s=="."?dot:dash);
-await new Promise(r=>setTimeout(r,400));
+await new Promise(r=>setTimeout(r,300));
 }
 }
 }
@@ -154,13 +137,6 @@ o.start();
 o.stop(ctx.currentTime+d/1000);
 }
 
-function error(){
-play("bad");
-document.body.classList.add("flash","shake");
-setTimeout(()=>document.body.classList.remove("flash","shake"),300);
-}
-
-// Q1
 function checkQ1(){
 if(q1.value.toLowerCase()=="lynx"){
 play("good");
@@ -169,11 +145,10 @@ startSoldat();
 }
 
 // SOLDAT
-let t=3,int;
+let t=10,int;
 
 function startSoldat(){
 next("soldat");
-play("radio");
 int=setInterval(()=>{
 t--;
 timer.innerText=t;
@@ -183,9 +158,8 @@ if(t<=0) fail();
 
 function grenade(){
 clearInterval(int);
-radio.pause();
 play("explosion");
-setTimeout(()=>next("s5"),800);
+setTimeout(()=>next("s2"),800);
 }
 
 function fail(){
@@ -195,20 +169,43 @@ error();
 setTimeout(()=>location.reload(),800);
 }
 
-// Q2
-function checkQ2(){
-if(q2.value=="3"){
+// ARBRE
+function foundTree(){
 play("good");
-next("s6");
+alert("Tu vois le chiffre 3");
+next("s3");
+}
+
+// FEUILLE
+function checkQ2(){
+if(q2.value.toLowerCase()=="soldat"){
+play("good");
+next("s4");
+}else error();
+}
+
+// MEMOIRE
+let seq="rouge jaune bleu vert";
+
+function startMemory(){
+sequence.innerText=seq;
+setTimeout(()=>sequence.innerText="",3000);
+}
+
+function checkMemory(){
+if(memoryInput.value.toLowerCase()==seq){
+play("good");
+alert("MEMOIRE");
+next("s5");
 }else error();
 }
 
 // FINAL
 function checkFinal(){
-let val=final.value.toLowerCase().replace(" ","");
-if(val=="lynx3"){
+let val=final.value.toLowerCase();
+if(val=="soldat3"){
 play("good");
-next("s8");
+next("s6");
 }else error();
 }
 
