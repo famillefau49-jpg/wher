@@ -9,49 +9,24 @@
 body{margin:0;background:black;color:white;text-align:center;font-family:Arial;}
 .screen{display:none;padding:20px;}
 .active{display:block;}
-
 img{width:90%;max-width:500px;border-radius:10px;margin:10px;}
-
-button{padding:12px;margin:6px;border:none;border-radius:8px;background:#2e7d32;color:white;}
-
+button{padding:10px;margin:5px;border:none;border-radius:8px;background:#2e7d32;color:white;}
 .colorBox{width:60px;height:60px;display:inline-block;margin:5px;border-radius:10px;}
-
 #timer{font-size:30px;color:red;}
 
-.flash{animation:flash 0.3s;}
-@keyframes flash{0%{background:red;}100%{background:black;}}
-
-/* POPUP */
 .popup{
-display:none;
-position:fixed;
-top:0;
-left:0;
-width:100%;
-height:100%;
-background:rgba(0,0,0,0.9);
-justify-content:center;
-align-items:center;
-}
-
-#popupContent{
-animation:zoomIn 0.5s ease;
+display:none;position:fixed;top:0;left:0;width:100%;height:100%;
+background:rgba(0,0,0,0.9);justify-content:center;align-items:center;
 }
 
 #number{
 font-size:80px;
-text-shadow:0 0 20px yellow,0 0 40px orange;
 animation:glow 1s infinite alternate;
-}
-
-@keyframes zoomIn{
-from{transform:scale(0.3);}
-to{transform:scale(1);}
 }
 
 @keyframes glow{
 from{text-shadow:0 0 10px yellow;}
-to{text-shadow:0 0 40px orange,0 0 60px yellow;}
+to{text-shadow:0 0 40px orange;}
 }
 </style>
 </head>
@@ -64,13 +39,11 @@ to{text-shadow:0 0 40px orange,0 0 60px yellow;}
 <div class="screen active" id="s0">
 <h2>Mission Résistance</h2>
 <img src="enfants.png">
-<p>Vous arrivez à la ferme…</p>
-<button onclick="next('s1')">Continuer</button>
+<button onclick="next('s1')">Commencer</button>
 </div>
 
 <!-- MORSE -->
 <div class="screen" id="s1">
-<p>Message du fermier :</p>
 <h2>.-.. -.-- -. -..-</h2>
 <input id="q1"><br>
 <button onclick="checkQ1()">Valider</button>
@@ -79,36 +52,32 @@ to{text-shadow:0 0 40px orange,0 0 60px yellow;}
 <!-- SOLDAT -->
 <div class="screen" id="soldat">
 <img src="z2.png">
-<p>HALT ! Une grenade !</p>
+<p>HALT !</p>
 <div id="timer">10</div>
-<button onclick="grenade()">💣 Lancer</button>
-<button onclick="fail()">🏃 Fuir</button>
+<button onclick="grenade()">💣</button>
+<button onclick="fail()">🏃</button>
 </div>
 
 <!-- ARBRE -->
 <div class="screen" id="s2">
-<p>Observe l’arbre… clique sur la gravure</p>
-
+<p>Clique sur la gravure</p>
 <div style="position:relative;display:inline-block;">
 <img src="resiarb.png">
-
-<div onclick="showPopup()" 
-style="position:absolute;top:60%;left:40%;width:80px;height:80px;border:2px dashed white;">
-</div>
+<div onclick="showPopup()" style="position:absolute;top:60%;left:40%;width:80px;height:80px;border:2px dashed white;"></div>
 </div>
 </div>
 
 <!-- POPUP -->
 <div id="popup" class="popup">
-<div id="popupContent">
+<div>
 <h1 id="number">3</h1>
 <button onclick="closePopup()">Continuer</button>
 </div>
 </div>
 
-<!-- QUESTION -->
+<!-- QUESTION ARBRE -->
 <div class="screen" id="s2q">
-<p>Quel chiffre était gravé ?</p>
+<p>Quel chiffre ?</p>
 <input id="treeAnswer"><br>
 <button onclick="checkTree()">Valider</button>
 </div>
@@ -116,23 +85,14 @@ style="position:absolute;top:60%;left:40%;width:80px;height:80px;border:2px dash
 <!-- LETTRES -->
 <div class="screen" id="s3">
 <p>Reconstitue le mot :</p>
-
-<button onclick="addLetter('S')">S</button>
-<button onclick="addLetter('O')">O</button>
-<button onclick="addLetter('L')">L</button>
-<button onclick="addLetter('D')">D</button>
-<button onclick="addLetter('A')">A</button>
-<button onclick="addLetter('T')">T</button>
-
+<div id="letters"></div>
 <p id="word"></p>
-
 <button onclick="checkWord()">Valider</button>
 </div>
 
 <!-- MEMOIRE -->
 <div class="screen" id="s4">
-<p>Observe…</p>
-
+<p>Mémorise :</p>
 <div id="sequence"></div>
 
 <div>
@@ -143,8 +103,16 @@ style="position:absolute;top:60%;left:40%;width:80px;height:80px;border:2px dash
 </div>
 
 <p id="player"></p>
-
 <button onclick="checkMemory()">Valider</button>
+</div>
+
+<!-- SONS -->
+<div class="screen" id="sSound">
+<p>Écoute les sons</p>
+<button onclick="playSounds()">🔊</button>
+<div id="animalButtons"></div>
+<p id="animalAnswer"></p>
+<button onclick="checkAnimals()">Valider</button>
 </div>
 
 <!-- COFFRE -->
@@ -157,7 +125,6 @@ style="position:absolute;top:60%;left:40%;width:80px;height:80px;border:2px dash
 <!-- FIN -->
 <div class="screen" id="s6">
 <h2>Mission accomplie</h2>
-<img src="final.png">
 </div>
 
 <script>
@@ -166,120 +133,125 @@ function next(id){
 document.querySelector(".active").classList.remove("active");
 document.getElementById(id).classList.add("active");
 
-if(id==="s4"){
-playerSeq=[];
-document.getElementById("player").innerText="";
-showSequence();
-}
-}
-
-function error(){
-document.body.classList.add("flash");
-setTimeout(()=>document.body.classList.remove("flash"),200);
+if(id==="s3") loadLetters();
+if(id==="s4"){playerSeq=[];showSequence();}
+if(id==="sSound"){playerAnimals=[];loadAnimals();}
 }
 
 // MORSE
 function checkQ1(){
-if(q1.value.toLowerCase()=="lynx"){
-startSoldat();
-}else error();
+if(q1.value.toLowerCase()=="lynx") startSoldat();
 }
 
 // SOLDAT
-let t=10,int;
-
+let t,int;
 function startSoldat(){
 next("soldat");
 t=10;
-int=setInterval(()=>{
-t--;
-timer.innerText=t;
-if(t<=0) fail();
-},1000);
+int=setInterval(()=>{t--;timer.innerText=t;if(t<=0) fail();},1000);
 }
+function grenade(){clearInterval(int);next("s2");}
+function fail(){location.reload();}
 
-function grenade(){
-clearInterval(int);
-next("s2");
-}
-
-function fail(){
-clearInterval(int);
-alert("Trop lent !");
-location.reload();
-}
-
-// POPUP
+// ARBRE
 function showPopup(){
-document.getElementById("popup").style.display="flex";
-document.getElementById("foundSound").play();
+popup.style.display="flex";
+foundSound.play();
 }
-
 function closePopup(){
-document.getElementById("popup").style.display="none";
+popup.style.display="none";
 next("s2q");
 }
-
 function checkTree(){
-if(treeAnswer.value=="3"){
-next("s3");
-}else error();
+if(treeAnswer.value=="3") next("s3");
 }
 
 // LETTRES
 let currentWord="";
-
+function loadLetters(){
+let letters=["T","A","S","D","L","O"];
+letters.sort(()=>Math.random()-0.5);
+lettersDiv.innerHTML="";
+letters.forEach(l=>{
+let b=document.createElement("button");
+b.innerText=l;
+b.onclick=()=>addLetter(l);
+letters.appendChild;
+lettersDiv.appendChild(b);
+});
+}
 function addLetter(l){
 currentWord+=l;
-document.getElementById("word").innerText=currentWord;
+word.innerText=currentWord;
 }
-
 function checkWord(){
-if(currentWord.toLowerCase()=="soldat"){
-next("s4");
-}else{
-currentWord="";
-document.getElementById("word").innerText="";
-error();
-}
+if(currentWord.toLowerCase()=="soldat") next("s4");
+else{currentWord="";word.innerText="";}
 }
 
 // MEMOIRE
-let seq=["r","y","b","g"];
-let playerSeq=[];
-
+let colors=["r","y","b","g"];
+let seq=[],playerSeq=[];
+function generateSequence(){
+seq=[];
+for(let i=0;i<4;i++){
+seq.push(colors[Math.floor(Math.random()*4)]);
+}
+}
 function showSequence(){
-let s=document.getElementById("sequence");
-s.innerHTML="";
+generateSequence();
+sequence.innerHTML="";
 seq.forEach(c=>{
 let d=document.createElement("div");
 d.className="colorBox";
 d.style.background=c=="r"?"red":c=="y"?"yellow":c=="b"?"blue":"green";
-s.appendChild(d);
+sequence.appendChild(d);
 });
-setTimeout(()=>{s.innerHTML="";},3000);
+setTimeout(()=>sequence.innerHTML="",3000);
 }
-
 function clickColor(c){
 playerSeq.push(c);
-document.getElementById("player").innerText=playerSeq.join("-");
+player.innerText=playerSeq.join("-");
+}
+function checkMemory(){
+if(playerSeq.join()==seq.join()) next("sSound");
+else{playerSeq=[];player.innerText="";}
 }
 
-function checkMemory(){
-if(playerSeq.join()==seq.join()){
-next("s5");
-}else{
-playerSeq=[];
-document.getElementById("player").innerText="";
-error();
+// SONS
+let correctSeq=["chat","chien","hibou"];
+let allAnimals=["chat","chien","hibou","vache","cheval","coq"];
+let playerAnimals=[];
+
+function playSounds(){
+new Audio("chat.mp3").play();
+setTimeout(()=>new Audio("chien.mp3").play(),1500);
+setTimeout(()=>new Audio("hibou.mp3").play(),3000);
 }
+
+function loadAnimals(){
+animalButtons.innerHTML="";
+allAnimals.sort(()=>Math.random()-0.5).forEach(a=>{
+let b=document.createElement("button");
+b.innerText=a;
+b.onclick=()=>addAnimal(a);
+animalButtons.appendChild(b);
+});
+}
+
+function addAnimal(a){
+playerAnimals.push(a);
+animalAnswer.innerText=playerAnimals.join(" ");
+}
+
+function checkAnimals(){
+if(playerAnimals.join()==correctSeq.join()) next("s5");
+else{playerAnimals=[];animalAnswer.innerText="";}
 }
 
 // FINAL
 function checkFinal(){
-if(final.value.toLowerCase()=="soldat3"){
-next("s6");
-}else error();
+if(final.value.toLowerCase()=="soldat3") next("s6");
 }
 
 </script>
