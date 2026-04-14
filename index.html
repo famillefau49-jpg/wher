@@ -12,17 +12,9 @@ body{margin:0;background:black;color:white;text-align:center;font-family:Arial;}
 
 img{width:90%;max-width:500px;border-radius:10px;margin:10px;}
 
-button{padding:12px;margin:8px;border:none;border-radius:8px;background:#2e7d32;color:white;}
+button{padding:12px;margin:6px;border:none;border-radius:8px;background:#2e7d32;color:white;font-size:16px;}
 
-input{padding:10px;border-radius:8px;border:none;}
-
-.colorBox{
-  width:60px;
-  height:60px;
-  display:inline-block;
-  margin:5px;
-  border-radius:10px;
-}
+.colorBox{width:60px;height:60px;display:inline-block;margin:5px;border-radius:10px;}
 
 .flash{animation:flash 0.3s;}
 @keyframes flash{0%{background:red;}100%{background:black;}}
@@ -43,10 +35,10 @@ input{padding:10px;border-radius:8px;border:none;}
 
 <!-- MORSE -->
 <div class="screen" id="s1">
-<p>Le fermier te donne un message :</p>
+<p>Le fermier te montre un message :</p>
 <h2>.-.. -.-- -. -..-</h2>
-<p>Que lis-tu ?</p>
-<input id="q1"><br>
+<p>Chaque groupe correspond à une lettre</p>
+<input id="q1" placeholder="Mot"><br>
 <button onclick="checkQ1()">Valider</button>
 </div>
 
@@ -61,29 +53,37 @@ input{padding:10px;border-radius:8px;border:none;}
 
 <!-- ARBRE -->
 <div class="screen" id="s2">
-<p>Observe l’arbre… quelque chose est gravé</p>
+<p>Observe l’arbre…</p>
 
-<div style="position:relative; display:inline-block;">
-  <img src="resiarb.png">
-
-  <div onclick="reveal3()" 
-       style="position:absolute; top:60%; left:40%; width:80px; height:80px;">
-  </div>
+<div style="position:relative;display:inline-block;">
+<img src="resiarb.png">
+<div onclick="askTree()" style="position:absolute;top:60%;left:40%;width:80px;height:80px;"></div>
 </div>
 
-<p id="treeText"></p>
+<p id="treeQuestion"></p>
 
-<button id="treeBtn" onclick="next('s3')" style="display:none;">
-Continuer
-</button>
+<div id="treeInput" style="display:none;">
+<input id="treeAnswer"><br>
+<button onclick="checkTree()">Valider</button>
+</div>
 </div>
 
-<!-- FEUILLE -->
+<!-- LETTRES -->
 <div class="screen" id="s3">
-<p>Remets les lettres dans l’ordre :</p>
-<h2>S A L T</h2>
-<input id="q2"><br>
-<button onclick="checkQ2()">Valider</button>
+<p>Reconstitue le mot :</p>
+
+<div id="letters">
+<button onclick="addLetter('S')">S</button>
+<button onclick="addLetter('O')">O</button>
+<button onclick="addLetter('L')">L</button>
+<button onclick="addLetter('D')">D</button>
+<button onclick="addLetter('A')">A</button>
+<button onclick="addLetter('T')">T</button>
+</div>
+
+<p id="word"></p>
+
+<button onclick="checkWord()">Valider</button>
 </div>
 
 <!-- MEMOIRE -->
@@ -93,10 +93,10 @@ Continuer
 <div id="sequence"></div>
 
 <div>
-  <div class="colorBox" style="background:red;" onclick="clickColor('r')"></div>
-  <div class="colorBox" style="background:yellow;" onclick="clickColor('y')"></div>
-  <div class="colorBox" style="background:blue;" onclick="clickColor('b')"></div>
-  <div class="colorBox" style="background:green;" onclick="clickColor('g')"></div>
+<div class="colorBox" style="background:red;" onclick="clickColor('r')"></div>
+<div class="colorBox" style="background:yellow;" onclick="clickColor('y')"></div>
+<div class="colorBox" style="background:blue;" onclick="clickColor('b')"></div>
+<div class="colorBox" style="background:green;" onclick="clickColor('g')"></div>
 </div>
 
 <p id="player"></p>
@@ -125,9 +125,9 @@ document.querySelector(".active").classList.remove("active");
 document.getElementById(id).classList.add("active");
 
 if(id==="s4"){
-  playerSeq=[];
-  document.getElementById("player").innerText="";
-  showSequence();
+playerSeq=[];
+document.getElementById("player").innerText="";
+showSequence();
 }
 }
 
@@ -168,16 +168,33 @@ location.reload();
 }
 
 // ARBRE
-function reveal3(){
-document.getElementById("treeText").innerHTML="Tu vois une gravure : <h2>3</h2>";
-document.getElementById("treeBtn").style.display="inline-block";
+function askTree(){
+document.getElementById("treeQuestion").innerText="Quel chiffre est gravé ?";
+document.getElementById("treeInput").style.display="block";
 }
 
-// FEUILLE
-function checkQ2(){
-if(q2.value.toLowerCase()=="soldat"){
-next("s4");
+function checkTree(){
+if(treeAnswer.value=="3"){
+next("s3");
 }else error();
+}
+
+// LETTRES
+let currentWord="";
+
+function addLetter(l){
+currentWord+=l;
+document.getElementById("word").innerText=currentWord;
+}
+
+function checkWord(){
+if(currentWord.toLowerCase()=="soldat"){
+next("s4");
+}else{
+currentWord="";
+document.getElementById("word").innerText="";
+error();
+}
 }
 
 // MEMOIRE
