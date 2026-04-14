@@ -12,48 +12,48 @@ body{margin:0;background:black;color:white;text-align:center;font-family:Arial;}
 
 img{width:90%;max-width:500px;border-radius:10px;margin:10px;}
 
-button{padding:12px;margin:8px;background:#2e7d32;color:white;border:none;border-radius:8px;}
+button{padding:12px;margin:8px;border:none;border-radius:8px;background:#2e7d32;color:white;}
 
 input{padding:10px;border-radius:8px;border:none;}
 
-.zone{position:relative;display:inline-block;}
-.click{position:absolute;}
-
-#timer{font-size:30px;color:red;}
+.colorBox{
+  width:60px;
+  height:60px;
+  display:inline-block;
+  margin:5px;
+  border-radius:10px;
+}
 
 .flash{animation:flash 0.3s;}
 @keyframes flash{0%{background:red;}100%{background:black;}}
+
+#timer{font-size:30px;color:red;}
 </style>
 </head>
 
 <body>
 
-<!-- SONS -->
-<audio id="good" src="2241.mp3"></audio>
-<audio id="bad" src="9334.mp3"></audio>
-<audio id="tir" src="Sharp crack of a sniper rifle in a desolate urban environment.mp3"></audio>
-<audio id="explosion" src="Whizzing sound of incoming artillery shells followed by a ground-shaking impact.mp3"></audio>
-
 <!-- INTRO -->
 <div class="screen active" id="s0">
-<h2>MISSION RÉSISTANCE</h2>
+<h2>Mission Résistance</h2>
 <img src="enfants.png">
-<p>Vous êtes les seuls capables d’agir…</p>
-<button onclick="next('s1')">Commencer</button>
+<p>Vous arrivez à la ferme…</p>
+<button onclick="next('s1')">Continuer</button>
 </div>
 
 <!-- MORSE -->
 <div class="screen" id="s1">
-<p>Message radio :</p>
-<button onclick="playMorse()">🔊 Écouter</button><br>
-<input id="q1" placeholder="Mot"><br>
+<p>Le fermier te donne un message :</p>
+<h2>.-.. -.-- -. -..-</h2>
+<p>Que lis-tu ?</p>
+<input id="q1"><br>
 <button onclick="checkQ1()">Valider</button>
 </div>
 
 <!-- SOLDAT -->
 <div class="screen" id="soldat">
 <img src="z2.png">
-<p>HALT !</p>
+<p>HALT ! Une grenade !</p>
 <div id="timer">10</div>
 <button onclick="grenade()">💣 Lancer</button>
 <button onclick="fail()">🏃 Fuir</button>
@@ -61,85 +61,84 @@ input{padding:10px;border-radius:8px;border:none;}
 
 <!-- ARBRE -->
 <div class="screen" id="s2">
-<p>Trouve la gravure</p>
-<div class="zone">
-<img src="resiarb.png">
-<div class="click" style="top:70%;left:40%;width:80px;height:80px;" onclick="foundTree()"></div>
+<p>Observe l’arbre… quelque chose est gravé</p>
+
+<div style="position:relative; display:inline-block;">
+  <img src="resiarb.png">
+
+  <div onclick="reveal3()" 
+       style="position:absolute; top:60%; left:40%; width:80px; height:80px;">
+  </div>
 </div>
+
+<p id="treeText"></p>
+
+<button id="treeBtn" onclick="next('s3')" style="display:none;">
+Continuer
+</button>
 </div>
 
 <!-- FEUILLE -->
 <div class="screen" id="s3">
-<img src="feuille.png">
-<p>Remets les lettres dans l’ordre</p>
+<p>Remets les lettres dans l’ordre :</p>
+<h2>S A L T</h2>
 <input id="q2"><br>
 <button onclick="checkQ2()">Valider</button>
 </div>
 
 <!-- MEMOIRE -->
 <div class="screen" id="s4">
-<p>Mémorise la séquence</p>
-<h2 id="sequence"></h2>
-<button onclick="startMemory()">Voir</button><br>
-<input id="memoryInput" placeholder="ex: rouge bleu vert"><br>
+<p>Observe bien… les couleurs vont disparaître</p>
+
+<div id="sequence"></div>
+
+<div>
+  <div class="colorBox" style="background:red;" onclick="clickColor('r')"></div>
+  <div class="colorBox" style="background:yellow;" onclick="clickColor('y')"></div>
+  <div class="colorBox" style="background:blue;" onclick="clickColor('b')"></div>
+  <div class="colorBox" style="background:green;" onclick="clickColor('g')"></div>
+</div>
+
+<p id="player"></p>
+
 <button onclick="checkMemory()">Valider</button>
 </div>
 
 <!-- COFFRE -->
 <div class="screen" id="s5">
-<p>Entre le code du coffre</p>
+<p>Assemble :</p>
+<p><b>MOT + CHIFFRE</b></p>
 <input id="final"><br>
-<button onclick="checkFinal()">Valider</button>
+<button onclick="checkFinal()">Ouvrir</button>
 </div>
 
 <!-- FIN -->
 <div class="screen" id="s6">
-<h2>MISSION ACCOMPLIE</h2>
+<h2>Mission accomplie</h2>
 <img src="final.png">
-<p>Message transmis</p>
 </div>
 
 <script>
 
-// NAV
 function next(id){
 document.querySelector(".active").classList.remove("active");
 document.getElementById(id).classList.add("active");
+
+if(id==="s4"){
+  playerSeq=[];
+  document.getElementById("player").innerText="";
+  showSequence();
+}
 }
 
-// AUDIO
-function play(id){document.getElementById(id).play();}
-
-// ERROR
 function error(){
-play("bad");
 document.body.classList.add("flash");
 setTimeout(()=>document.body.classList.remove("flash"),200);
 }
 
 // MORSE
-async function playMorse(){
-let dot=200,dash=600;
-let seq=[".-..","-.--","-.","-..-"];
-for(let l of seq){
-for(let s of l){
-beep(s=="."?dot:dash);
-await new Promise(r=>setTimeout(r,300));
-}
-}
-}
-
-function beep(d){
-let ctx=new AudioContext();
-let o=ctx.createOscillator();
-o.connect(ctx.destination);
-o.start();
-o.stop(ctx.currentTime+d/1000);
-}
-
 function checkQ1(){
 if(q1.value.toLowerCase()=="lynx"){
-play("good");
 startSoldat();
 }else error();
 }
@@ -149,6 +148,7 @@ let t=10,int;
 
 function startSoldat(){
 next("soldat");
+t=10;
 int=setInterval(()=>{
 t--;
 timer.innerText=t;
@@ -158,53 +158,68 @@ if(t<=0) fail();
 
 function grenade(){
 clearInterval(int);
-play("explosion");
-setTimeout(()=>next("s2"),800);
+next("s2");
 }
 
 function fail(){
 clearInterval(int);
-play("tir");
-error();
-setTimeout(()=>location.reload(),800);
+alert("Trop lent !");
+location.reload();
 }
 
 // ARBRE
-function foundTree(){
-play("good");
-alert("Tu vois le chiffre 3");
-next("s3");
+function reveal3(){
+document.getElementById("treeText").innerHTML="Tu vois une gravure : <h2>3</h2>";
+document.getElementById("treeBtn").style.display="inline-block";
 }
 
 // FEUILLE
 function checkQ2(){
 if(q2.value.toLowerCase()=="soldat"){
-play("good");
 next("s4");
 }else error();
 }
 
 // MEMOIRE
-let seq="rouge jaune bleu vert";
+let seq=["r","y","b","g"];
+let playerSeq=[];
 
-function startMemory(){
-sequence.innerText=seq;
-setTimeout(()=>sequence.innerText="",3000);
+function showSequence(){
+let s=document.getElementById("sequence");
+s.innerHTML="";
+
+seq.forEach(c=>{
+let div=document.createElement("div");
+div.className="colorBox";
+div.style.background=
+c=="r"?"red":
+c=="y"?"yellow":
+c=="b"?"blue":
+"green";
+s.appendChild(div);
+});
+
+setTimeout(()=>{s.innerHTML="";},3000);
+}
+
+function clickColor(c){
+playerSeq.push(c);
+document.getElementById("player").innerText=playerSeq.join("-");
 }
 
 function checkMemory(){
-if(memoryInput.value.toLowerCase()==seq){
-play("good");
-alert("MEMOIRE");
+if(playerSeq.join()==seq.join()){
 next("s5");
-}else error();
+}else{
+playerSeq=[];
+document.getElementById("player").innerText="";
+error();
+}
 }
 
 // FINAL
 function checkFinal(){
-let val=final.value.toLowerCase();
-if(val=="soldat3"){
-play("good");
+if(final.value.toLowerCase()=="soldat3"){
 next("s6");
 }else error();
 }
