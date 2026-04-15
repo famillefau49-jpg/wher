@@ -17,9 +17,7 @@ padding:12px;margin:8px;
 background:#2e7d32;color:white;
 border:none;border-radius:8px;
 font-weight:bold;
-transition:0.2s;
 }
-button:hover{transform:scale(1.05);background:#43a047;}
 
 input{padding:10px;border-radius:8px;border:none;}
 
@@ -27,7 +25,7 @@ input{padding:10px;border-radius:8px;border:none;}
 @keyframes flash{0%{background:#b71c1c;}100%{background:#111;}}
 
 #puzzle{display:grid;grid-template-columns:repeat(4,1fr);gap:3px;max-width:350px;margin:auto;}
-.piece{width:100%;aspect-ratio:1/1;background-size:cover;}
+.piece{width:100%;aspect-ratio:1/1;background:#555;}
 </style>
 </head>
 
@@ -43,7 +41,6 @@ input{padding:10px;border-radius:8px;border:none;}
 <div class="screen active" id="intro">
 <h2>Pontain-l’Écluse</h2>
 <img src="pont.png">
-<p>Le village est occupé…</p>
 <button onclick="next('fermier')">Commencer</button>
 </div>
 
@@ -51,8 +48,7 @@ input{padding:10px;border-radius:8px;border:none;}
 <div class="screen" id="fermier">
 <h2>La ferme</h2>
 <img src="ferme.png">
-<p>“Lis ce message”</p>
-<p style="font-size:22px">.-.. -.-- -. -..</p>
+<p>.-.. -.-- -. -..-</p>
 <input id="morse">
 <button onclick="checkMorse()">Valider</button>
 </div>
@@ -61,7 +57,6 @@ input{padding:10px;border-radius:8px;border:none;}
 <div class="screen" id="grange">
 <h2>La grange</h2>
 <img src="grenade.png">
-<p>Une grenade !</p>
 <button onclick="choix(true)">Lancer</button>
 <button onclick="choix(false)">Se coucher</button>
 </div>
@@ -69,13 +64,14 @@ input{padding:10px;border-radius:8px;border:none;}
 <!-- GRENADES -->
 <div class="screen" id="grenadeGame">
 <h2>Vite !</h2>
-<img id="grenadeImg" src="grenade.png" style="width:120px;display:none;">
+<img id="grenadeImg" src="grenade.png"
+style="width:100px;position:absolute;display:none;cursor:pointer;">
 </div>
 
 <!-- PONT -->
 <div class="screen" id="pont">
 <h2>Mémorise</h2>
-<div id="sequence" style="font-size:30px;"></div>
+<div id="sequence"></div>
 </div>
 
 <div class="screen" id="pont2">
@@ -85,7 +81,7 @@ input{padding:10px;border-radius:8px;border:none;}
 
 <!-- FORET -->
 <div class="screen" id="foret">
-<h2>Affiche effacée</h2>
+<h2>Affiche</h2>
 <img src="mot.png">
 <input id="repForet">
 <button onclick="checkForet()">Valider</button>
@@ -93,7 +89,7 @@ input{padding:10px;border-radius:8px;border:none;}
 
 <!-- SOLDAT -->
 <div class="screen" id="soldat">
-<h2>Message</h2>
+<h2>Lettres</h2>
 <p>T S A L D O</p>
 <input id="repSoldat">
 <button onclick="checkSoldat()">Valider</button>
@@ -101,15 +97,20 @@ input{padding:10px;border-radius:8px;border:none;}
 
 <!-- ARBRE -->
 <div class="screen" id="arbre">
-<h2>Arbre</h2>
+
+<h2>Un arbre étrange</h2>
+
+<div style="position:relative;display:inline-block;">
 <img src="arbre.png">
-<button onclick="next('arbre2')">Observer</button>
+
+<div onclick="show3()"
+style="position:absolute;top:50%;left:40%;width:80px;height:80px;"></div>
 </div>
 
-<div class="screen" id="arbre2">
-<p>Quel chiffre ?</p>
-<input id="repArbre">
-<button onclick="checkArbre()">Valider</button>
+<p id="indice3" style="font-size:40px;display:none;">3</p>
+
+<button id="btn3" onclick="startQuiz()" style="display:none;">Continuer</button>
+
 </div>
 
 <!-- QUIZ -->
@@ -164,39 +165,48 @@ next("grange");
 }else error();
 }
 
-// CHOIX GRENADE
+// CHOIX
 function choix(ok){
-if(ok){
-startGrenade();
-}else error();
+if(ok){startGrenade();}
+else error();
 }
 
-// MINI JEU GRENADE
-let g=0;
+// GRENADES
+let g=0,timer;
+
 function startGrenade(){
 next("grenadeGame");
 g=0;
 spawn();
 }
-function spawn(){
-if(g>=10){startPont();return;}
-let img=document.getElementById("grenadeImg");
-img.style.display="block";
-img.style.position="absolute";
-img.style.top=Math.random()*70+"vh";
-img.style.left=Math.random()*70+"vw";
 
-let timeout=setTimeout(()=>{sound("boom");startGrenade();},1000);
+function spawn(){
+
+if(g>=10){
+startPont();
+return;
+}
+
+let img=document.getElementById("grenadeImg");
+
+img.style.display="block";
+img.style.top=(Math.random()*60+10)+"vh";
+img.style.left=(Math.random()*60+10)+"vw";
+
+timer=setTimeout(()=>{
+sound("boom");
+startGrenade();
+},1000);
 
 img.onclick=()=>{
-clearTimeout(timeout);
+clearTimeout(timer);
 sound("click");
 g++;
 spawn();
 };
 }
 
-// PONT MEMOIRE
+// PONT
 let seq=[],colors=["🔴","🔵","🟢","🟡"];
 function startPont(){
 next("pont");
@@ -205,6 +215,7 @@ for(let i=0;i<4;i++) seq.push(colors[Math.floor(Math.random()*4)]);
 sequence.innerText=seq.join(" ");
 setTimeout(()=>{next("pont2");loadButtons();},2000);
 }
+
 let i=0;
 function loadButtons(){
 buttons.innerHTML="";
@@ -216,6 +227,7 @@ buttons.appendChild(b);
 });
 i=0;
 }
+
 function clickC(c){
 if(c!==seq[i]){error();startPont();return;}
 i++;
@@ -239,11 +251,10 @@ next("arbre");
 }
 
 // ARBRE
-function checkArbre(){
-if(repArbre.value=="3"){
+function show3(){
+document.getElementById("indice3").style.display="block";
+document.getElementById("btn3").style.display="inline-block";
 sound("good");
-startQuiz();
-}else error();
 }
 
 // QUIZ
@@ -253,7 +264,12 @@ let quiz=[
 ["Village ?",["Pontain-l’Écluse","Paris"],0],
 ["Mot ?",["ECLUSE","RADIO"],0]
 ];
-function startQuiz(){next("quiz");loadQ();}
+
+function startQuiz(){
+next("quiz");
+loadQ();
+}
+
 function loadQ(){
 q.innerText=quiz[qi][0];
 a.innerHTML="";
@@ -264,6 +280,7 @@ b.onclick=()=>checkQ(index);
 a.appendChild(b);
 });
 }
+
 function checkQ(index){
 if(index===quiz[qi][2]){
 qi++;
@@ -275,21 +292,23 @@ else loadQ();
 // PUZZLE SIMPLE
 let order=[1,2,3,4,5,6,7,8,9,10,11,12];
 let selected=null;
+
 function startPuzzle(){
 next("puzzleScreen");
 order.sort(()=>Math.random()-0.5);
 render();
 }
+
 function render(){
 puzzle.innerHTML="";
 order.forEach((n,i)=>{
 let d=document.createElement("div");
 d.className="piece";
-d.style.backgroundColor="#555";
 d.onclick=()=>clickP(i);
 puzzle.appendChild(d);
 });
 }
+
 function clickP(i){
 if(selected===null){selected=i;}
 else{
@@ -299,12 +318,13 @@ render();
 checkWin();
 }
 }
+
 function checkWin(){
 for(let i=0;i<12;i++) if(order[i]!=i+1)return;
 next("coffre");
 }
 
-// COFFRE FINAL
+// COFFRE
 function checkCoffre(){
 if(code.value=="1940"){
 sound("good");
