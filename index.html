@@ -23,24 +23,16 @@ input{padding:10px;border-radius:8px;border:none;}
 
 .flash{animation:flash 0.2s;}
 @keyframes flash{0%{background:#b71c1c;}100%{background:#111;}}
-
-#puzzle{display:grid;grid-template-columns:repeat(4,1fr);gap:3px;max-width:350px;margin:auto;}
-.piece{width:100%;aspect-ratio:1/1;background:#555;}
 </style>
 </head>
 
 <body>
 
-<!-- SONS -->
-<audio id="good" src="good.wav"></audio>
-<audio id="bad" src="bad.wav"></audio>
-<audio id="click" src="click.wav"></audio>
-<audio id="boom" src="explosion.wav"></audio>
-
 <!-- INTRO -->
 <div class="screen active" id="intro">
 <h2>Pontain-l’Écluse</h2>
 <img src="pont.png">
+<p>Le village est occupé… mais la Résistance agit.</p>
 <button onclick="next('fermier')">Commencer</button>
 </div>
 
@@ -48,8 +40,9 @@ input{padding:10px;border-radius:8px;border:none;}
 <div class="screen" id="fermier">
 <h2>La ferme</h2>
 <img src="ferme.png">
-<p>.-.. -.-- -. -..-</p>
-<input id="morse">
+<p>Décode le message en morse :</p>
+<p style="font-size:22px">.-.. -.-- -. -..-</p>
+<input id="morse" placeholder="Mot">
 <button onclick="checkMorse()">Valider</button>
 </div>
 
@@ -57,48 +50,53 @@ input{padding:10px;border-radius:8px;border:none;}
 <div class="screen" id="grange">
 <h2>La grange</h2>
 <img src="grenade.png">
-<button onclick="choix(true)">Lancer</button>
+<p>Que fais-tu ?</p>
+<button onclick="choix(true)">💣 Lancer</button>
 <button onclick="choix(false)">Se coucher</button>
 </div>
 
 <!-- GRENADES -->
 <div class="screen" id="grenadeGame">
-<h2>Vite !</h2>
-<img id="grenadeImg" src="grenade.png"
-style="width:100px;position:absolute;display:none;cursor:pointer;">
+<h2>⚠️ DANGER</h2>
+<p>Clique sur 10 grenades avant qu’elles explosent !</p>
+<div id="zone" style="position:relative;height:70vh;"></div>
+<p id="compteur"></p>
 </div>
 
 <!-- PONT -->
 <div class="screen" id="pont">
-<h2>Mémorise</h2>
-<div id="sequence"></div>
+<h2>Mémorise la séquence</h2>
+<div id="sequence" style="font-size:30px;"></div>
 </div>
 
 <div class="screen" id="pont2">
-<h2>Reproduis</h2>
+<h2>Reproduis la séquence</h2>
 <div id="buttons"></div>
 </div>
 
 <!-- FORET -->
 <div class="screen" id="foret">
-<h2>Affiche</h2>
+<h2>Affiche effacée</h2>
 <img src="mot.png">
+<p>Quel est le mot ?</p>
 <input id="repForet">
 <button onclick="checkForet()">Valider</button>
 </div>
 
 <!-- SOLDAT -->
 <div class="screen" id="soldat">
-<h2>Lettres</h2>
+<h2>Message codé</h2>
 <p>T S A L D O</p>
+<p>Remets les lettres dans le bon ordre</p>
 <input id="repSoldat">
 <button onclick="checkSoldat()">Valider</button>
 </div>
 
 <!-- ARBRE -->
 <div class="screen" id="arbre">
-
 <h2>Un arbre étrange</h2>
+
+<p>Clique sur l’arbre pour trouver un indice</p>
 
 <div style="position:relative;display:inline-block;">
 <img src="arbre.png">
@@ -110,7 +108,6 @@ style="position:absolute;top:50%;left:40%;width:80px;height:80px;"></div>
 <p id="indice3" style="font-size:40px;display:none;">3</p>
 
 <button id="btn3" onclick="startQuiz()" style="display:none;">Continuer</button>
-
 </div>
 
 <!-- QUIZ -->
@@ -120,15 +117,10 @@ style="position:absolute;top:50%;left:40%;width:80px;height:80px;"></div>
 <div id="a"></div>
 </div>
 
-<!-- PUZZLE -->
-<div class="screen" id="puzzleScreen">
-<h2>Puzzle</h2>
-<div id="puzzle"></div>
-</div>
-
 <!-- COFFRE -->
 <div class="screen" id="coffre">
-<h2>Coffre</h2>
+<h2>Coffre militaire</h2>
+<p>Entre le code</p>
 <input id="code">
 <button onclick="checkCoffre()">Ouvrir</button>
 </div>
@@ -145,14 +137,7 @@ document.querySelector(".active").classList.remove("active");
 document.getElementById(id).classList.add("active");
 }
 
-function sound(id){
-let s=document.getElementById(id);
-s.currentTime=0;
-s.play();
-}
-
 function error(){
-sound("bad");
 document.body.classList.add("flash");
 setTimeout(()=>document.body.classList.remove("flash"),200);
 }
@@ -160,7 +145,6 @@ setTimeout(()=>document.body.classList.remove("flash"),200);
 // MORSE
 function checkMorse(){
 if(morse.value.toLowerCase()=="lynx"){
-sound("good");
 next("grange");
 }else error();
 }
@@ -172,51 +156,62 @@ else error();
 }
 
 // GRENADES
-let g=0,timer;
+let g=0,total=10,timeoutG;
 
 function startGrenade(){
 next("grenadeGame");
 g=0;
-spawn();
+spawnGrenade();
 }
 
-function spawn(){
+function spawnGrenade(){
 
-if(g>=10){
+clearTimeout(timeoutG);
+
+if(g>=total){
 startPont();
 return;
 }
 
-let img=document.getElementById("grenadeImg");
+let zone=document.getElementById("zone");
+zone.innerHTML="";
 
-img.style.display="block";
-img.style.top=(Math.random()*60+10)+"vh";
-img.style.left=(Math.random()*60+10)+"vw";
+let img=document.createElement("img");
+img.src="grenade.png";
+img.style.width="80px";
+img.style.position="absolute";
+img.style.top=Math.random()*60+"%";
+img.style.left=Math.random()*80+"%";
+img.style.cursor="pointer";
 
-timer=setTimeout(()=>{
-sound("boom");
-startGrenade();
-},1000);
+zone.appendChild(img);
+
+document.getElementById("compteur").innerText =
+"Grenade "+(g+1)+" / "+total;
 
 img.onclick=()=>{
-clearTimeout(timer);
-sound("click");
+clearTimeout(timeoutG);
 g++;
-spawn();
+spawnGrenade();
 };
+
+timeoutG=setTimeout(()=>{
+g=0;
+spawnGrenade();
+},1000);
 }
 
 // PONT
-let seq=[],colors=["🔴","🔵","🟢","🟡"];
+let seq=[],colors=["🔴","🔵","🟢","🟡"],i=0;
+
 function startPont(){
 next("pont");
 seq=[];
-for(let i=0;i<4;i++) seq.push(colors[Math.floor(Math.random()*4)]);
+for(let j=0;j<4;j++) seq.push(colors[Math.floor(Math.random()*4)]);
 sequence.innerText=seq.join(" ");
 setTimeout(()=>{next("pont2");loadButtons();},2000);
 }
 
-let i=0;
 function loadButtons(){
 buttons.innerHTML="";
 colors.forEach(c=>{
@@ -231,13 +226,12 @@ i=0;
 function clickC(c){
 if(c!==seq[i]){error();startPont();return;}
 i++;
-if(i===seq.length){sound("good");next("foret");}
+if(i===seq.length) next("foret");
 }
 
 // FORET
 function checkForet(){
 if(repForet.value.toLowerCase()=="ecluse"){
-sound("good");
 next("soldat");
 }else error();
 }
@@ -245,7 +239,6 @@ next("soldat");
 // SOLDAT
 function checkSoldat(){
 if(repSoldat.value.toLowerCase()=="soldat"){
-sound("good");
 next("arbre");
 }else error();
 }
@@ -254,15 +247,14 @@ next("arbre");
 function show3(){
 document.getElementById("indice3").style.display="block";
 document.getElementById("btn3").style.display="inline-block";
-sound("good");
 }
 
 // QUIZ
 let qi=0;
 let quiz=[
-["Enfants ?",["Eusèbe, Lisa, François","Autre"],0],
-["Village ?",["Pontain-l’Écluse","Paris"],0],
-["Mot ?",["ECLUSE","RADIO"],0]
+["Quels sont les enfants ?",["Eusèbe, Lisa, François","Autre"],0],
+["Le village ?",["Pontain-l’Écluse","Paris"],0],
+["Mot trouvé ?",["ECLUSE","RADIO"],0]
 ];
 
 function startQuiz(){
@@ -284,50 +276,14 @@ a.appendChild(b);
 function checkQ(index){
 if(index===quiz[qi][2]){
 qi++;
-if(qi>=quiz.length) startPuzzle();
+if(qi>=quiz.length) next("coffre");
 else loadQ();
 }else error();
-}
-
-// PUZZLE SIMPLE
-let order=[1,2,3,4,5,6,7,8,9,10,11,12];
-let selected=null;
-
-function startPuzzle(){
-next("puzzleScreen");
-order.sort(()=>Math.random()-0.5);
-render();
-}
-
-function render(){
-puzzle.innerHTML="";
-order.forEach((n,i)=>{
-let d=document.createElement("div");
-d.className="piece";
-d.onclick=()=>clickP(i);
-puzzle.appendChild(d);
-});
-}
-
-function clickP(i){
-if(selected===null){selected=i;}
-else{
-[order[selected],order[i]]=[order[i],order[selected]];
-selected=null;
-render();
-checkWin();
-}
-}
-
-function checkWin(){
-for(let i=0;i<12;i++) if(order[i]!=i+1)return;
-next("coffre");
 }
 
 // COFFRE
 function checkCoffre(){
 if(code.value=="1940"){
-sound("good");
 next("fin");
 }else error();
 }
