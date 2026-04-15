@@ -28,22 +28,22 @@ input{padding:10px;border-radius:8px;border:none;}
 
 #puzzle{display:grid;grid-template-columns:repeat(4,1fr);gap:3px;max-width:350px;margin:auto;}
 .piece{width:100%;aspect-ratio:1/1;background-size:cover;}
-.selected{outline:3px solid yellow;}
 </style>
 </head>
 
 <body>
 
-<audio id="good" src="good.mp3"></audio>
-<audio id="bad" src="bad.mp3"></audio>
-<audio id="click" src="click.mp3"></audio>
-<audio id="boom" src="explosion.mp3"></audio>
+<!-- SONS -->
+<audio id="good" src="good.wav"></audio>
+<audio id="bad" src="bad.wav"></audio>
+<audio id="click" src="click.wav"></audio>
+<audio id="boom" src="explosion.wav"></audio>
 
 <!-- INTRO -->
 <div class="screen active" id="intro">
 <h2>Pontain-l’Écluse</h2>
-<img src="village.png">
-<p>Le village est occupé… mais la Résistance agit.</p>
+<img src="pont.png">
+<p>Le village est occupé…</p>
 <button onclick="next('fermier')">Commencer</button>
 </div>
 
@@ -51,7 +51,7 @@ input{padding:10px;border-radius:8px;border:none;}
 <div class="screen" id="fermier">
 <h2>La ferme</h2>
 <img src="ferme.png">
-<p>“Décode ce message”</p>
+<p>“Lis ce message”</p>
 <p style="font-size:22px">.-.. -.-- -. -..</p>
 <input id="morse">
 <button onclick="checkMorse()">Valider</button>
@@ -164,14 +164,14 @@ next("grange");
 }else error();
 }
 
-// GRENADE CHOIX
+// CHOIX GRENADE
 function choix(ok){
 if(ok){
 startGrenade();
 }else error();
 }
 
-// GRENADE GAME
+// MINI JEU GRENADE
 let g=0;
 function startGrenade(){
 next("grenadeGame");
@@ -186,7 +186,7 @@ img.style.position="absolute";
 img.style.top=Math.random()*70+"vh";
 img.style.left=Math.random()*70+"vw";
 
-let timeout=setTimeout(()=>{error();startGrenade();},1000);
+let timeout=setTimeout(()=>{sound("boom");startGrenade();},1000);
 
 img.onclick=()=>{
 clearTimeout(timeout);
@@ -196,7 +196,7 @@ spawn();
 };
 }
 
-// PONT
+// PONT MEMOIRE
 let seq=[],colors=["🔴","🔵","🟢","🟡"];
 function startPont(){
 next("pont");
@@ -219,7 +219,7 @@ i=0;
 function clickC(c){
 if(c!==seq[i]){error();startPont();return;}
 i++;
-if(i===seq.length) next("foret");
+if(i===seq.length){sound("good");next("foret");}
 }
 
 // FORET
@@ -272,7 +272,7 @@ else loadQ();
 }else error();
 }
 
-// PUZZLE
+// PUZZLE SIMPLE
 let order=[1,2,3,4,5,6,7,8,9,10,11,12];
 let selected=null;
 function startPuzzle(){
@@ -285,7 +285,7 @@ puzzle.innerHTML="";
 order.forEach((n,i)=>{
 let d=document.createElement("div");
 d.className="piece";
-d.style.backgroundImage=`url(radio${n}.png)`;
+d.style.backgroundColor="#555";
 d.onclick=()=>clickP(i);
 puzzle.appendChild(d);
 });
@@ -304,9 +304,10 @@ for(let i=0;i<12;i++) if(order[i]!=i+1)return;
 next("coffre");
 }
 
-// COFFRE
+// COFFRE FINAL
 function checkCoffre(){
 if(code.value=="1940"){
+sound("good");
 next("fin");
 }else error();
 }
