@@ -6,249 +6,309 @@
 <title>Mission Résistance</title>
 
 <style>
-body{
-  margin:0;
-  font-family: Arial;
-  background:black;
-  color:white;
-  text-align:center;
-}
-
+body{margin:0;background:#111;color:white;font-family:Arial;text-align:center;}
 .screen{display:none;padding:20px;}
 .active{display:block;}
 
-img{
-  width:90%;
-  max-width:500px;
-  border-radius:10px;
-  margin:15px 0;
-}
+img{width:90%;max-width:400px;border-radius:10px;}
 
 button{
-  padding:12px 20px;
-  margin:10px;
-  border:none;
-  border-radius:8px;
-  background:#2e7d32;
-  color:white;
+padding:12px;margin:8px;
+background:#2e7d32;color:white;
+border:none;border-radius:8px;
+font-weight:bold;
+transition:0.2s;
 }
+button:hover{transform:scale(1.05);background:#43a047;}
 
-input{
-  padding:10px;
-  border-radius:8px;
-  border:none;
-}
+input{padding:10px;border-radius:8px;border:none;}
 
-#timer,#timerSoldat{
-  font-size:28px;
-  color:red;
-}
+.flash{animation:flash 0.2s;}
+@keyframes flash{0%{background:#b71c1c;}100%{background:#111;}}
 
-.flash{animation:flash 0.3s;}
-@keyframes flash{0%{background:red;}100%{background:black;}}
-
-.shake{animation:shake 0.3s;}
-@keyframes shake{
-  0%{transform:translateX(0);}
-  50%{transform:translateX(6px);}
-  100%{transform:translateX(0);}
-}
+#puzzle{display:grid;grid-template-columns:repeat(4,1fr);gap:3px;max-width:350px;margin:auto;}
+.piece{width:100%;aspect-ratio:1/1;background-size:cover;}
+.selected{outline:3px solid yellow;}
 </style>
 </head>
 
 <body>
 
-<!-- SONS -->
-<audio id="clic" src="261.mp3"></audio>
-<audio id="good" src="2241.mp3"></audio>
-<audio id="bad" src="9334.mp3"></audio>
-<audio id="alarm" src="10805.mp3"></audio>
-<audio id="tension" src="sf_tictac1.mp3" loop></audio>
-
-<!-- ENFANTS -->
-<div class="screen active" id="s0">
-  <h2>Les enfants de la Résistance</h2>
-  <img src="enfants.png">
-  <p>Vous êtes les seuls capables de passer inaperçus…</p>
-  <button onclick="next('s1')">Commencer la mission</button>
-</div>
+<audio id="good" src="good.mp3"></audio>
+<audio id="bad" src="bad.mp3"></audio>
+<audio id="click" src="click.mp3"></audio>
+<audio id="boom" src="explosion.mp3"></audio>
 
 <!-- INTRO -->
-<div class="screen" id="s1">
-  <img src="ferme.png">
-  <p>1940. Un message secret est caché.</p>
-  <button onclick="next('s2')">Continuer</button>
+<div class="screen active" id="intro">
+<h2>Pontain-l’Écluse</h2>
+<img src="village.png">
+<p>Le village est occupé… mais la Résistance agit.</p>
+<button onclick="next('fermier')">Commencer</button>
 </div>
 
 <!-- FERMIER -->
-<div class="screen" id="s2">
-  <img src="fermier.png">
-  <p>"Prouve que tu es des nôtres."</p>
-  <button onclick="next('s3')">Continuer</button>
+<div class="screen" id="fermier">
+<h2>La ferme</h2>
+<img src="ferme.png">
+<p>“Décode ce message”</p>
+<p style="font-size:22px">.-.. -.-- -. -..</p>
+<input id="morse">
+<button onclick="checkMorse()">Valider</button>
 </div>
 
-<!-- MORSE -->
-<div class="screen" id="s3">
-  <img src="mot.png">
-  <p>Message radio intercepté :</p>
-  <button onclick="playMorse()">🔊 Écouter</button>
-  <br><br>
-  <input id="q1" placeholder="Mot">
-  <br>
-  <button onclick="checkQ1()">Valider</button>
+<!-- GRANGE -->
+<div class="screen" id="grange">
+<h2>La grange</h2>
+<img src="grenade.png">
+<p>Une grenade !</p>
+<button onclick="choix(true)">Lancer</button>
+<button onclick="choix(false)">Se coucher</button>
+</div>
+
+<!-- GRENADES -->
+<div class="screen" id="grenadeGame">
+<h2>Vite !</h2>
+<img id="grenadeImg" src="grenade.png" style="width:120px;display:none;">
+</div>
+
+<!-- PONT -->
+<div class="screen" id="pont">
+<h2>Mémorise</h2>
+<div id="sequence" style="font-size:30px;"></div>
+</div>
+
+<div class="screen" id="pont2">
+<h2>Reproduis</h2>
+<div id="buttons"></div>
 </div>
 
 <!-- FORET -->
-<div class="screen" id="s4">
-  <img src="foret.png">
-  <p>Va jusqu’au pont…</p>
-  <button onclick="next('s5')">Continuer</button>
-</div>
-
-<!-- Q2 -->
-<div class="screen" id="s5">
-  <img src="pont.png">
-  <p>Numéro du message ?</p>
-  <input id="q2">
-  <br>
-  <button onclick="checkQ2()">Valider</button>
+<div class="screen" id="foret">
+<h2>Affiche effacée</h2>
+<img src="mot.png">
+<input id="repForet">
+<button onclick="checkForet()">Valider</button>
 </div>
 
 <!-- SOLDAT -->
 <div class="screen" id="soldat">
-  <img src="z2.png">
-  <h2>HALT !</h2>
-  <p>Un soldat te vise !</p>
-  <div id="timerSoldat">3</div>
-  <button onclick="grenade()">💣 Lancer</button>
-  <button onclick="fuite()">🏃 Fuir</button>
+<h2>Message</h2>
+<p>T S A L D O</p>
+<input id="repSoldat">
+<button onclick="checkSoldat()">Valider</button>
 </div>
 
-<!-- CACHE -->
-<div class="screen" id="s7">
-  <img src="resiarb.png">
-  <p>Code final</p>
-  <input id="final">
-  <br>
-  <button onclick="checkFinal()">Valider</button>
+<!-- ARBRE -->
+<div class="screen" id="arbre">
+<h2>Arbre</h2>
+<img src="arbre.png">
+<button onclick="next('arbre2')">Observer</button>
 </div>
 
-<!-- QR -->
-<div class="screen" id="s8">
-  <img src="lock-ttx6E2HF.png">
-  <p>Scan</p>
+<div class="screen" id="arbre2">
+<p>Quel chiffre ?</p>
+<input id="repArbre">
+<button onclick="checkArbre()">Valider</button>
 </div>
 
-<!-- FIN -->
-<div class="screen" id="s9">
-  <img src="final.png">
-  <h2>Mission accomplie</h2>
+<!-- QUIZ -->
+<div class="screen" id="quiz">
+<h2>Test</h2>
+<p id="q"></p>
+<div id="a"></div>
+</div>
+
+<!-- PUZZLE -->
+<div class="screen" id="puzzleScreen">
+<h2>Puzzle</h2>
+<div id="puzzle"></div>
+</div>
+
+<!-- COFFRE -->
+<div class="screen" id="coffre">
+<h2>Coffre</h2>
+<input id="code">
+<button onclick="checkCoffre()">Ouvrir</button>
+</div>
+
+<div class="screen" id="fin">
+<h2>Mission réussie</h2>
+<p>RESISTANCE AU TROU PERDU</p>
 </div>
 
 <script>
 
-// volume bas
-clic.volume=0.2;
-good.volume=0.3;
-bad.volume=0.25;
-alarm.volume=0.2;
-tension.volume=0.15;
-
-function play(id){
-  let a=document.getElementById(id);
-  a.currentTime=0;
-  a.play();
-}
-
 function next(id){
-  play("clic");
-  document.querySelector(".active").classList.remove("active");
-  document.getElementById(id).classList.add("active");
+document.querySelector(".active").classList.remove("active");
+document.getElementById(id).classList.add("active");
 }
 
-// MORSE
-async function playMorse(){
-  let dot=200, dash=600;
-
-  let seq=[".-..","-.--","-.","-..-"];
-
-  for(let l of seq){
-    for(let s of l){
-      let dur = s=="."?dot:dash;
-      beep(dur);
-      await new Promise(r=>setTimeout(r,dur+200));
-    }
-    await new Promise(r=>setTimeout(r,400));
-  }
-}
-
-function beep(d){
-  let ctx=new AudioContext();
-  let o=ctx.createOscillator();
-  o.connect(ctx.destination);
-  o.start();
-  o.stop(ctx.currentTime+d/1000);
+function sound(id){
+let s=document.getElementById(id);
+s.currentTime=0;
+s.play();
 }
 
 function error(){
-  play("bad");
-  play("alarm");
-  document.body.classList.add("flash","shake");
-  setTimeout(()=>document.body.classList.remove("flash","shake"),300);
+sound("bad");
+document.body.classList.add("flash");
+setTimeout(()=>document.body.classList.remove("flash"),200);
 }
 
-// Q1
-function checkQ1(){
-  if(q1.value.toLowerCase()=="lynx"){
-    play("good");
-    next("s4");
-  }else error();
+// MORSE
+function checkMorse(){
+if(morse.value.toLowerCase()=="lynx"){
+sound("good");
+next("grange");
+}else error();
 }
 
-// Q2
-function checkQ2(){
-  if(q2.value=="3"){
-    play("good");
-    startSoldat();
-  }else error();
+// GRENADE CHOIX
+function choix(ok){
+if(ok){
+startGrenade();
+}else error();
+}
+
+// GRENADE GAME
+let g=0;
+function startGrenade(){
+next("grenadeGame");
+g=0;
+spawn();
+}
+function spawn(){
+if(g>=10){startPont();return;}
+let img=document.getElementById("grenadeImg");
+img.style.display="block";
+img.style.position="absolute";
+img.style.top=Math.random()*70+"vh";
+img.style.left=Math.random()*70+"vw";
+
+let timeout=setTimeout(()=>{error();startGrenade();},1000);
+
+img.onclick=()=>{
+clearTimeout(timeout);
+sound("click");
+g++;
+spawn();
+};
+}
+
+// PONT
+let seq=[],colors=["🔴","🔵","🟢","🟡"];
+function startPont(){
+next("pont");
+seq=[];
+for(let i=0;i<4;i++) seq.push(colors[Math.floor(Math.random()*4)]);
+sequence.innerText=seq.join(" ");
+setTimeout(()=>{next("pont2");loadButtons();},2000);
+}
+let i=0;
+function loadButtons(){
+buttons.innerHTML="";
+colors.forEach(c=>{
+let b=document.createElement("button");
+b.innerText=c;
+b.onclick=()=>clickC(c);
+buttons.appendChild(b);
+});
+i=0;
+}
+function clickC(c){
+if(c!==seq[i]){error();startPont();return;}
+i++;
+if(i===seq.length) next("foret");
+}
+
+// FORET
+function checkForet(){
+if(repForet.value.toLowerCase()=="ecluse"){
+sound("good");
+next("soldat");
+}else error();
 }
 
 // SOLDAT
-let t=3, int;
-
-function startSoldat(){
-  next("soldat");
-  t=3;
-  int=setInterval(()=>{
-    t--;
-    timerSoldat.innerText=t;
-    if(t<=0){fail();}
-  },1000);
+function checkSoldat(){
+if(repSoldat.value.toLowerCase()=="soldat"){
+sound("good");
+next("arbre");
+}else error();
 }
 
-function grenade(){
-  clearInterval(int);
-  play("good");
-  next("s7");
+// ARBRE
+function checkArbre(){
+if(repArbre.value=="3"){
+sound("good");
+startQuiz();
+}else error();
 }
 
-function fuite(){
-  fail();
+// QUIZ
+let qi=0;
+let quiz=[
+["Enfants ?",["Eusèbe, Lisa, François","Autre"],0],
+["Village ?",["Pontain-l’Écluse","Paris"],0],
+["Mot ?",["ECLUSE","RADIO"],0]
+];
+function startQuiz(){next("quiz");loadQ();}
+function loadQ(){
+q.innerText=quiz[qi][0];
+a.innerHTML="";
+quiz[qi][1].forEach((t,index)=>{
+let b=document.createElement("button");
+b.innerText=t;
+b.onclick=()=>checkQ(index);
+a.appendChild(b);
+});
+}
+function checkQ(index){
+if(index===quiz[qi][2]){
+qi++;
+if(qi>=quiz.length) startPuzzle();
+else loadQ();
+}else error();
 }
 
-function fail(){
-  clearInterval(int);
-  error();
-  setTimeout(()=>location.reload(),800);
+// PUZZLE
+let order=[1,2,3,4,5,6,7,8,9,10,11,12];
+let selected=null;
+function startPuzzle(){
+next("puzzleScreen");
+order.sort(()=>Math.random()-0.5);
+render();
+}
+function render(){
+puzzle.innerHTML="";
+order.forEach((n,i)=>{
+let d=document.createElement("div");
+d.className="piece";
+d.style.backgroundImage=`url(radio${n}.png)`;
+d.onclick=()=>clickP(i);
+puzzle.appendChild(d);
+});
+}
+function clickP(i){
+if(selected===null){selected=i;}
+else{
+[order[selected],order[i]]=[order[i],order[selected]];
+selected=null;
+render();
+checkWin();
+}
+}
+function checkWin(){
+for(let i=0;i<12;i++) if(order[i]!=i+1)return;
+next("coffre");
 }
 
-// FINAL
-function checkFinal(){
-  if(final.value.toLowerCase()=="lynx3"){
-    play("good");
-    next("s8");
-    setTimeout(()=>next("s9"),3000);
-  }else error();
+// COFFRE
+function checkCoffre(){
+if(code.value=="1940"){
+next("fin");
+}else error();
 }
 
 </script>
