@@ -10,54 +10,37 @@ body{margin:0;background:#111;color:white;font-family:Arial;text-align:center;}
 .screen{display:none;padding:20px;}
 .active{display:block;}
 
-img{width:90%;max-width:400px;border-radius:10px;}
-
 button{
 padding:12px;margin:8px;
 background:#2e7d32;color:white;
 border:none;border-radius:8px;
-font-weight:bold;
+font-size:16px;
 }
 
 input{padding:10px;border-radius:8px;border:none;}
 
-.flash{animation:flash 0.2s;}
-@keyframes flash{0%{background:#b71c1c;}100%{background:#111;}}
+img{width:90%;max-width:400px;}
 
-/* MORPION */
-#grid{display:grid;grid-template-columns:repeat(3,100px);gap:5px;justify-content:center;}
-.cell{width:100px;height:100px;background:#333;display:flex;align-items:center;justify-content:center;font-size:40px;}
-
-/* COFFRE */
-.lock{
-display:flex;
-justify-content:center;
-gap:10px;
-margin:20px;
-}
-
-.digit{
-font-size:40px;
-background:#222;
-padding:15px;
-border-radius:10px;
-width:50px;
-}
+.flash{background:#b71c1c;}
 </style>
 </head>
 
 <body>
 
+<!-- SONS -->
+<audio id="click" src="click.wav" preload="auto"></audio>
+<audio id="good" src="good.wav" preload="auto"></audio>
+<audio id="bad" src="bad.wav" preload="auto"></audio>
+
 <!-- INTRO -->
-<div class="screen active" id="intro">
+<div id="intro" class="screen active">
 <h2>Pontain-l’Écluse</h2>
-<img src="pont.png">
-<button onclick="next('fermier')">Commencer</button>
+<p>Mission secrète</p>
+<button onclick="startGame()">Commencer</button>
 </div>
 
 <!-- MORSE -->
-<div class="screen" id="fermier">
-<h2>La ferme</h2>
+<div id="fermier" class="screen">
 <p>Décode :</p>
 <p>.-.. -.-- -. -..-</p>
 <input id="morse">
@@ -65,25 +48,176 @@ width:50px;
 </div>
 
 <!-- MORPION -->
-<div class="screen" id="morpion">
-<h2>Gagne contre l’ennemi</h2>
+<div id="morpion" class="screen">
+<h3>Gagne au morpion</h3>
 <div id="grid"></div>
 <p id="status"></p>
 </div>
 
 <!-- FORET -->
-<div class="screen" id="foret">
-<img src="mot.png">
+<div id="foret" class="screen">
 <p>_ C L _ S E</p>
 <input id="repForet">
 <button onclick="checkForet()">Valider</button>
 </div>
 
-<!-- SOLDAT -->
-<div class="screen" id="soldat">
-<p>T S A L D O</p>
-<input id="repSoldat">
-<button onclick="checkSoldat()">Valider</button>
+<!-- COFFRE -->
+<div id="coffre" class="screen">
+<h3>Coffre</h3>
+
+<div>
+<button onclick="change(0,1)">▲</button>
+<button onclick="change(1,1)">▲</button>
+<button onclick="change(2,1)">▲</button>
+<button onclick="change(3,1)">▲</button>
 </div>
 
-<!-- AR
+<div>
+<span id="d0">0</span>
+<span id="d1">0</span>
+<span id="d2">0</span>
+<span id="d3">0</span>
+</div>
+
+<div>
+<button onclick="change(0,-1)">▼</button>
+<button onclick="change(1,-1)">▼</button>
+<button onclick="change(2,-1)">▼</button>
+<button onclick="change(3,-1)">▼</button>
+</div>
+
+<button onclick="checkLock()">Ouvrir</button>
+</div>
+
+<div id="fin" class="screen">
+<h2>Mission réussie</h2>
+</div>
+
+<script>
+
+// -------- AUDIO SAFE --------
+function play(id){
+let s=document.getElementById(id);
+if(s){
+s.currentTime=0;
+s.play().catch(()=>{});
+}
+}
+
+// -------- NAV --------
+function next(id){
+document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+document.getElementById(id).classList.add("active");
+}
+
+// -------- START FIX --------
+function startGame(){
+play("click");
+next("fermier");
+}
+
+// -------- MORSE --------
+function checkMorse(){
+play("click");
+if(document.getElementById("morse").value.toLowerCase()=="lynx"){
+play("good");
+startMorpion();
+}else{
+play("bad");
+}
+}
+
+// -------- MORPION --------
+let board=["","","","","","","","",""];
+
+function startMorpion(){
+next("morpion");
+draw();
+}
+
+function draw(){
+let grid=document.getElementById("grid");
+grid.innerHTML="";
+grid.style.display="grid";
+grid.style.gridTemplateColumns="repeat(3,80px)";
+
+board.forEach((v,i)=>{
+let d=document.createElement("div");
+d.style.height="80px";
+d.style.background="#333";
+d.style.margin="5px";
+d.style.display="flex";
+d.style.alignItems="center";
+d.style.justifyContent="center";
+d.style.fontSize="30px";
+d.innerText=v;
+
+d.onclick=()=>{
+if(board[i]!="") return;
+
+board[i]="X";
+
+if(win("X")){
+play("good");
+setTimeout(()=>next("foret"),500);
+return;
+}
+
+let empty=board.map((v,i)=>v==""?i:null).filter(v=>v!=null);
+if(empty.length>0){
+let r=empty[Math.floor(Math.random()*empty.length)];
+board[r]="O";
+}
+
+if(win("O")){
+play("bad");
+board=["","","","","","","","",""];
+draw();
+return;
+}
+
+draw();
+};
+
+grid.appendChild(d);
+});
+}
+
+function win(p){
+let w=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+return w.some(c=>c.every(i=>board[i]==p));
+}
+
+// -------- FORET --------
+function checkForet(){
+play("click");
+if(repForet.value.toLowerCase()=="ecluse"){
+play("good");
+next("coffre");
+}else{
+play("bad");
+}
+}
+
+// -------- COFFRE --------
+let digits=[0,0,0,0];
+
+function change(i,val){
+play("click");
+digits[i]=(digits[i]+val+10)%10;
+document.getElementById("d"+i).innerText=digits[i];
+}
+
+function checkLock(){
+if(digits.join("")=="1940"){
+play("good");
+next("fin");
+}else{
+play("bad");
+}
+}
+
+</script>
+
+</body>
+</html>
