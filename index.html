@@ -25,22 +25,23 @@ input{padding:10px;border-radius:8px;border:none;}
 @keyframes flash{0%{background:#b71c1c;}100%{background:#111;}}
 
 /* MORPION */
-#grid{
-display:grid;
-grid-template-columns:repeat(3,100px);
-gap:5px;
+#grid{display:grid;grid-template-columns:repeat(3,100px);gap:5px;justify-content:center;}
+.cell{width:100px;height:100px;background:#333;display:flex;align-items:center;justify-content:center;font-size:40px;}
+
+/* COFFRE */
+.lock{
+display:flex;
 justify-content:center;
-margin-top:20px;
+gap:10px;
+margin:20px;
 }
 
-.cell{
-width:100px;height:100px;
-background:#333;
-display:flex;
-align-items:center;
-justify-content:center;
+.digit{
 font-size:40px;
-cursor:pointer;
+background:#222;
+padding:15px;
+border-radius:10px;
+width:50px;
 }
 </style>
 </head>
@@ -54,11 +55,10 @@ cursor:pointer;
 <button onclick="next('fermier')">Commencer</button>
 </div>
 
-<!-- FERMIER -->
+<!-- MORSE -->
 <div class="screen" id="fermier">
 <h2>La ferme</h2>
-<img src="ferme.png">
-<p>Décode le message :</p>
+<p>Décode :</p>
 <p>.-.. -.-- -. -..-</p>
 <input id="morse">
 <button onclick="checkMorse()">Valider</button>
@@ -66,28 +66,15 @@ cursor:pointer;
 
 <!-- MORPION -->
 <div class="screen" id="morpion">
-<h2>Jeu du morpion</h2>
-<p>Gagne contre l’ennemi</p>
-
+<h2>Gagne contre l’ennemi</h2>
 <div id="grid"></div>
 <p id="status"></p>
 </div>
 
-<!-- PONT -->
-<div class="screen" id="pont">
-<h2>Mémorise</h2>
-<div id="sequence"></div>
-</div>
-
-<div class="screen" id="pont2">
-<h2>Reproduis</h2>
-<div id="buttons"></div>
-</div>
-
 <!-- FORET -->
 <div class="screen" id="foret">
-<h2>Affiche</h2>
 <img src="mot.png">
+<p>_ C L _ S E</p>
 <input id="repForet">
 <button onclick="checkForet()">Valider</button>
 </div>
@@ -99,208 +86,4 @@ cursor:pointer;
 <button onclick="checkSoldat()">Valider</button>
 </div>
 
-<!-- ARBRE -->
-<div class="screen" id="arbre">
-<h2>Arbre</h2>
-
-<p>Clique sur l’image</p>
-
-<div style="position:relative;display:inline-block;">
-<img src="arbre.png">
-<div onclick="show3()" style="position:absolute;top:50%;left:40%;width:80px;height:80px;"></div>
-</div>
-
-<p id="indice3" style="display:none;font-size:40px;">3</p>
-<button id="btn3" style="display:none;" onclick="startQuiz()">Continuer</button>
-</div>
-
-<!-- QUIZ -->
-<div class="screen" id="quiz">
-<p id="q"></p>
-<div id="a"></div>
-</div>
-
-<!-- COFFRE -->
-<div class="screen" id="coffre">
-<input id="code">
-<button onclick="checkCoffre()">Ouvrir</button>
-</div>
-
-<div class="screen" id="fin">
-<h2>Mission réussie</h2>
-</div>
-
-<script>
-
-function next(id){
-document.querySelector(".active").classList.remove("active");
-document.getElementById(id).classList.add("active");
-}
-
-function error(){
-document.body.classList.add("flash");
-setTimeout(()=>document.body.classList.remove("flash"),200);
-}
-
-// MORSE
-function checkMorse(){
-if(morse.value.toLowerCase()=="lynx"){
-startMorpion();
-}else error();
-}
-
-/////////////////////////
-// MORPION
-/////////////////////////
-
-let board=["","","","","","","","",""];
-let player="X";
-
-function startMorpion(){
-next("morpion");
-board=["","","","","","","","",""];
-draw();
-}
-
-function draw(){
-let grid=document.getElementById("grid");
-grid.innerHTML="";
-board.forEach((v,i)=>{
-let d=document.createElement("div");
-d.className="cell";
-d.innerText=v;
-d.onclick=()=>play(i);
-grid.appendChild(d);
-});
-}
-
-function play(i){
-if(board[i]!="") return;
-
-board[i]="X";
-
-if(checkWin("X")){
-document.getElementById("status").innerText="Gagné !";
-setTimeout(()=>startPont(),1000);
-return;
-}
-
-// IA simple
-let empty=board.map((v,i)=>v==""?i:null).filter(v=>v!=null);
-if(empty.length>0){
-let r=empty[Math.floor(Math.random()*empty.length)];
-board[r]="O";
-}
-
-if(checkWin("O")){
-document.getElementById("status").innerText="Perdu...";
-setTimeout(startMorpion,1000);
-return;
-}
-
-draw();
-}
-
-function checkWin(p){
-let w=[
-[0,1,2],[3,4,5],[6,7,8],
-[0,3,6],[1,4,7],[2,5,8],
-[0,4,8],[2,4,6]
-];
-return w.some(c=>c.every(i=>board[i]==p));
-}
-
-/////////////////////////
-// PONT
-/////////////////////////
-
-let seq=[],colors=["🔴","🔵","🟢","🟡"],i=0;
-
-function startPont(){
-next("pont");
-seq=[];
-for(let j=0;j<4;j++) seq.push(colors[Math.floor(Math.random()*4)]);
-sequence.innerText=seq.join(" ");
-setTimeout(()=>{next("pont2");loadButtons();},2000);
-}
-
-function loadButtons(){
-buttons.innerHTML="";
-colors.forEach(c=>{
-let b=document.createElement("button");
-b.innerText=c;
-b.onclick=()=>clickC(c);
-buttons.appendChild(b);
-});
-i=0;
-}
-
-function clickC(c){
-if(c!==seq[i]){error();startPont();return;}
-i++;
-if(i===seq.length) next("foret");
-}
-
-// FORET
-function checkForet(){
-if(repForet.value.toLowerCase()=="ecluse"){
-next("soldat");
-}else error();
-}
-
-// SOLDAT
-function checkSoldat(){
-if(repSoldat.value.toLowerCase()=="soldat"){
-next("arbre");
-}else error();
-}
-
-// ARBRE
-function show3(){
-indice3.style.display="block";
-btn3.style.display="inline-block";
-}
-
-// QUIZ
-let qi=0;
-let quiz=[
-["Enfants ?",["Eusèbe, Lisa, François","Autre"],0],
-["Village ?",["Pontain-l’Écluse","Paris"],0],
-["Mot ?",["ECLUSE","RADIO"],0]
-];
-
-function startQuiz(){
-next("quiz");
-loadQ();
-}
-
-function loadQ(){
-q.innerText=quiz[qi][0];
-a.innerHTML="";
-quiz[qi][1].forEach((t,index)=>{
-let b=document.createElement("button");
-b.innerText=t;
-b.onclick=()=>checkQ(index);
-a.appendChild(b);
-});
-}
-
-function checkQ(index){
-if(index===quiz[qi][2]){
-qi++;
-if(qi>=quiz.length) next("coffre");
-else loadQ();
-}else error();
-}
-
-// COFFRE
-function checkCoffre(){
-if(code.value=="1940"){
-next("fin");
-}else error();
-}
-
-</script>
-
-</body>
-</html>
+<!-- AR
